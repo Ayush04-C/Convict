@@ -37,7 +37,11 @@ MAX_REPLY_CHARS = 300
 MAX_STANCE_CHARS = 200
 MAX_FLAG_CHARS = 140
 MAX_FLAGS = 3
-MAX_EVIDENCE_CHARS = 1500       # a stored evidence value is cut to this many characters
+# A stored evidence value is cut to this many characters. It must stay large: the pipeline confirms a
+# hard gate only if each cited value equals the trusted dossier's value exactly, and a truncated value
+# never does (Retool's funding.milestones is about 13,000 characters, Zepto's about 31,000). Prompts
+# show only a short excerpt, so this does not enlarge them.
+MAX_EVIDENCE_CHARS = 100_000
 PROMPT_NOTE_CHARS = 300
 PROMPT_EVIDENCE_CHARS = 160
 PROMPT_EVIDENCE_LINES = 80

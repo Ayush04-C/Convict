@@ -154,7 +154,8 @@ def fallback_narrative(findings: list[Finding], unverified: list[str], gates: tu
         parts.append("No claim was contradicted by the available data.")
     parts.append(f"{verified} checks were verified and {partial} were only partly supported or flagged.")
     if gates:
-        parts.append(f"Hard gates backed by evidence: {', '.join(gates)}.")
+        parts.append(f"Gate proposals with supporting evidence (scoring confirms them separately): "
+                     f"{', '.join(gates)}.")
     if unverified:
         parts.append(f"{len(unverified)} claims could not be verified.")
     parts.append("Revenue is a Crustdata estimate, and EBITDA and profit are not available from this "
