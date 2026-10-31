@@ -71,6 +71,13 @@ def test_growth_against_the_timeseries(claimed, status, severity):
     assert result.metrics[0].name == "headcount_growth_12m_pct"
 
 
+def test_growth_notes_say_which_way_the_deck_is_off():
+    over = scale_team.compute_growth(claim(120.0, "percent", "team_growth", "YoY"), DOUBLING)
+    under = scale_team.compute_growth(claim(40.0, "percent", "team_growth", "YoY"), DOUBLING)
+    assert "overstates by 20 points" in over.note and "understates" not in over.note
+    assert "understates growth" in under.note and "overstates" not in under.note
+
+
 def test_growth_uses_the_requested_window():
     result = scale_team.compute_growth(claim(33.0, "percent", "team_growth", "last 6 months"), DOUBLING)
     assert result.status == "VERIFIED" and result.metrics[0].value == pytest.approx(33.33, abs=0.01)
