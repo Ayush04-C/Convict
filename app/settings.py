@@ -1,4 +1,5 @@
 """Ayush-owned settings; API authentication is independent of live providers."""
+
 from pathlib import Path
 from typing import Literal
 
@@ -54,20 +55,31 @@ class Settings(BaseSettings):
                 invalid.append("DEMO_PASS_HASH (invalid Argon2id hash)")
         if invalid:
             raise AuthConfigurationError(
-                "Invalid authentication configuration: " + ", ".join(invalid)
+                "Invalid authentication configuration: "
+                + ", ".join(invalid)
                 + ". Run python -m scripts.configure_auth from the Leo directory."
             )
 
-    def require_live_credentials(self, provider: Literal["crustdata", "gemini"] | None = None) -> None:
+    def require_live_credentials(
+        self, provider: Literal["crustdata", "gemini"] | None = None
+    ) -> None:
         missing = []
         if provider not in (None, "crustdata", "gemini"):
             raise ProviderConfigurationError("Unknown provider.")
-        if provider in (None, "crustdata") and not self.crustdata_api_key.get_secret_value().strip():
+        if (
+            provider in (None, "crustdata")
+            and not self.crustdata_api_key.get_secret_value().strip()
+        ):
             missing.append("CRUSTDATA_API_KEY")
         if provider in (None, "gemini") and not self.gemini_api_key.get_secret_value().strip():
             missing.append("GEMINI_API_KEY")
         if provider is None:
-            missing.extend(name.upper() for name in ("model_fast", "model_mid", "model_pro")
-                           if not getattr(self, name).strip())
+            missing.extend(
+                name.upper()
+                for name in ("model_fast", "model_mid", "model_pro")
+                if not getattr(self, name).strip()
+            )
         if missing:
-            raise ProviderConfigurationError("Configure " + ", ".join(missing) + " in .env before live calls.")
+            raise ProviderConfigurationError(
+                "Configure " + ", ".join(missing) + " in .env before live calls."
+            )
