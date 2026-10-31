@@ -203,10 +203,16 @@ async def _generate_validated(extractor: DocumentExtractor, parts, prompt: str, 
             f"{prompt}\n\nYour previous answer was invalid ({error}). Return corrected JSON only.")
         reply = await extractor.extract(parts, text, RawClaimSet, model)
         try:
-            return _convert(RawClaimSet.model_validate_json(_strip_fence(reply)), deck)
+            result = _convert(RawClaimSet.model_validate_json(_strip_fence(reply)), deck)
         except ValueError as exc:  # pydantic.ValidationError is a ValueError
             error = str(exc).replace("\n", " ")[:400]
-    raise ExtractionError(f"Gemini returned invalid claims twice ({error}).")
+            continue
+        if result.claims:
+            return result
+        # A pitch deck always makes claims. An empty list means the model failed (a throttled model, or
+        # a fallback model that gave up), and accepting it would produce a verdict about nothing.
+        error = "it contained no claims, but every pitch deck states some; extract them from the deck"
+    raise ExtractionError(f"The model returned invalid claims twice ({error}).")
 
 
 def _render_pages(deck: DeckContent) -> tuple[list[tuple[str, bytes]], str]:
