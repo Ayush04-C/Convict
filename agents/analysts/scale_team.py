@@ -89,7 +89,7 @@ def _points(data: dict) -> list[tuple[date, float]]:
     return sorted(points)
 
 
-def _growth_from_series(points: list[tuple[date, float]], months: int) -> tuple[float, float] | None:
+def growth_from_series(points: list[tuple[date, float]], months: int) -> tuple[float, float] | None:
     """(growth percent, base headcount) between the latest point and ~`months` earlier."""
     if len(points) < 2:
         return None
@@ -118,7 +118,7 @@ def compute_growth(claim: Claim | None, data: dict) -> CheckResult:
     elif claim.unit not in (None, "percent"):
         return unverifiable(name, claim, "Growth claim is not a percentage or multiple.", evidence)
 
-    series = _growth_from_series(_points(data), months)
+    series = growth_from_series(_points(data), months)
     source = "headcount.timeseries"
     if series is None:
         key = WINDOW_KEYS.get(months)
