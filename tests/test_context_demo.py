@@ -1,4 +1,5 @@
 """Offline manual harness regression checks."""
+
 import pytest
 
 
@@ -11,4 +12,3 @@ async def test_context_demo_is_offline_and_timeout_is_contained(tmp_path, timeou
     assert result["packets"] == 4 and result["agents_failed"] == int(timeout_agent)
     assert result["agents_succeeded"] == (3 if timeout_agent else 4)
     assert result["phase"] == "ROUND1"
-
