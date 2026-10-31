@@ -40,9 +40,19 @@ async function main(){
     await page.locator('#run-id').fill(runId);await page.getByRole('button',{name:'Open report'}).click();await page.locator('.outcome').waitFor({state:'visible'});
     await page.route('**/runs/*/report',async route=>{const response=await route.fetch();const report=await response.json();report.claims[0].findings[0].note='<img src=x onerror="window.injection=true">';await route.fulfill({json:report});});
     await page.getByRole('button',{name:'Open report'}).click();await page.getByText('<img src=x onerror="window.injection=true">',{exact:true}).waitFor();assert.equal(await page.locator('#report-content img').count(),0);assert.equal(await page.evaluate(()=>window.injection),undefined);
+    await page.unroute('**/runs/*/report');
+    const failurePdf=spawnSync(python,['-c',"import pymupdf,sys; d=pymupdf.open(); p=d.new_page(); p.insert_text((40,40),'EXTRACTION_FAILURE_TEST'); sys.stdout.buffer.write(d.tobytes()); d.close()"]);assert.equal(failurePdf.status,0);await page.locator('#deck').setInputFiles({name:'provider-outage-test.pdf',mimeType:'application/pdf',buffer:failurePdf.stdout});await page.getByRole('button',{name:'Review this deck'}).click();
+    await page.getByRole('heading',{name:'Review needs attention',exact:true}).waitFor();
+    await page.getByText('The extraction provider is unavailable, busy, or unreachable. Try again shortly.',{exact:true}).waitFor();
+    assert.equal(await page.locator('.outcome').count(),0);assert.equal(await page.locator('.agent-list li').filter({hasText:'Not started'}).count(),4);
+    const failedId=await page.locator('#run-id').inputValue();await page.getByRole('button',{name:'Retry this review'}).click();
+    await page.waitForFunction(old=>document.getElementById('run-id').value!==old,failedId);
+    await page.locator('.outcome').filter({hasText:'DO NOT INVEST'}).waitFor();assert.equal(await page.locator('#failure-actions').isVisible(),false);
+    if(process.env.LEO_WEB_FAILURE_SCREENSHOT)await page.screenshot({path:process.env.LEO_WEB_FAILURE_SCREENSHOT,fullPage:true});
+    await page.locator('#run-id').fill(runId);await page.getByRole('button',{name:'Open report'}).click();await page.locator('.outcome').waitFor({state:'visible'});assert.equal(await page.locator('#failure-actions').isVisible(),false);
     await page.setViewportSize({width:390,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
     await page.getByRole('button',{name:'Sign out'}).click();assert.equal(await page.locator('#workspace').isVisible(),false);assert.equal(await page.locator('#report-content').textContent(),'');assert.deepEqual(errors,[]);
-    console.log('PASS: sign-in errors, PDF validation, upload, full offline pipeline, four specialists, report, downloads, resume, missing run, safe text rendering, mobile layout and sign-out.');
+    console.log('PASS: sign-in errors, PDF validation, upload, full offline pipeline, four specialists, report, downloads, resume, missing run, safe text rendering, mobile layout, explicit failure diagnostics, retry, recovery and sign-out.');
   }finally{if(browser)await browser.close();server.kill('SIGTERM');await Promise.race([new Promise(resolve=>server.once('exit',resolve)),new Promise(resolve=>setTimeout(resolve,3000))]);if(server.exitCode===null)server.kill('SIGKILL');await fs.rm(directory,{recursive:true,force:true});}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

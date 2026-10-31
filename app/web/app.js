@@ -12,7 +12,7 @@ const dollars = value => value == null ? 'Not available' : new Intl.NumberFormat
 const date = value => {if(!value)return 'Not supplied by provider'; const parsed=new Date(value);return Number.isNaN(parsed.getTime()) ? 'Date unavailable' : parsed.toLocaleString(undefined,{timeZoneName:'short'});};
 function node(tag, content, className){const el=document.createElement(tag);if(content!=null)el.textContent=content;if(className)el.className=className;return el;}
 function error(message){$('error').textContent=message;$('error').hidden=!message;}
-function setBusy(value){busy=value;$('upload-fields').disabled=value;$('resume-button').disabled=value;}
+function setBusy(value){busy=value;$('upload-fields').disabled=value;$('resume-button').disabled=value;$('retry-review').disabled=value;}
 function signOut(){session.abort();session=new AbortController();token='';savedReport=null;activeRun='';setBusy(false);$('workspace').hidden=true;$('login-panel').hidden=false;$('signout').hidden=true;$('result').hidden=true;$('progress-panel').hidden=true;$('report-content').replaceChildren();$('run-id').value='';$('password').value='';error('');}
 async function request(path, options={}){
   const controller=new AbortController(), signal=session.signal;
@@ -36,9 +36,29 @@ async function request(path, options={}){
     throw e;
   }finally{clearTimeout(timeout);signal.removeEventListener('abort',cancel);}
 }
+const failureMessages = {
+  EXTRACTION_FAILED:'The review stopped while reading claims from the PDF, before company lookup or specialist checks. The model did not return usable claims. This alone does not identify an API-key problem.',
+  DECK_REJECTED:'The PDF could not be read. Choose an unencrypted, valid PDF and upload it again.',
+  PROVIDER_FAILED:'A company-data provider request failed. Check provider access and try again later.',
+  PIPELINE_TIMEOUT:'The review exceeded its time limit. You can retry the saved PDF.',
+  ALL_AGENTS_FAILED:'All specialist reviews failed. No investment decision was produced.',
+  PROCESS_INTERRUPTED:'The server restarted while this review was running. You can retry the saved PDF.',
+  CANCELLED:'This review was cancelled before completion. You can retry the saved PDF.'
+};
 function reportView(report){
   savedReport=report;
   const root=$('report-content');root.replaceChildren();$('result').hidden=false;
+  $('failure-actions').hidden=true;$('result-title').textContent='Your report';
+  $('download-md').textContent='Download Markdown';$('download-json').textContent='Download JSON';
+  if(!report.decision){
+    $('result-title').textContent='Review needs attention';$('failure-actions').hidden=false;
+    $('retry-review').hidden=report.status!=='failed'||report.failure_code==='DECK_REJECTED';$('retry-note').hidden=$('retry-review').hidden;
+    $('failure-reason').textContent=report.status==='cannot_assess'?'The company could not be identified confidently. Check the company name and website domain, then start a new review.':failureMessages[report.failure_code]||'The analysis stopped before a decision was produced. Retry the saved PDF or check the server logs.';
+    $('failure-detail').textContent=report.failure_details?.message||'The original run did not retain a detailed provider error. A specific timeout, quota, or key error cannot be established from this record.';
+    $('download-md').textContent='Download diagnostic Markdown';$('download-json').textContent='Download diagnostic JSON';
+    root.append(node('p','No completed investment report was produced. The downloads contain diagnostic information only.'));
+    return;
+  }
   root.append(node('p',report.verdict_label,'outcome'));
   if(report.is_stub)root.append(node('p','DEMO / INCOMPLETE: this report includes synthetic or unfinished components.','error'));
   const decision=report.decision;
@@ -89,19 +109,19 @@ function progress(status){
     const failed=states.find(s=>s.state==='FAILED');
     const current=states.find(s=>s.phase===status.phase);
     const allDone=['ROUND1','CHALLENGE','REPLY'].every(phase=>states.some(s=>s.phase===phase&&s.state==='DONE'));
-    const state=failed?'A phase failed':allDone?'All review phases complete':current?pretty(current.state):'Waiting';
+    const state=failed?'A phase failed':(['failed','cannot_assess'].includes(status.status)&&!states.length)?'Not started':allDone?'All review phases complete':current?pretty(current.state):'Waiting';
     list.append(node('li',agentNames[agent]+': '+state));
   }
 }
 async function monitor(id){
   if(!/^[a-zA-Z0-9-]{1,100}$/.test(id))throw new Error('Enter a valid run ID.');
   activeRun=id;$('run-id').value=id;$('run-label').textContent='Run ID: '+id;
-  const signal=session.signal;const started=Date.now();$('spinner').hidden=false;$('result').hidden=true;
+  const signal=session.signal;const started=Date.now();savedReport=null;$('spinner').hidden=false;$('result').hidden=true;
   while(!signal.aborted){
     const status=await request('/runs/'+encodeURIComponent(id));progress(status);
     if(['done','failed','cannot_assess'].includes(status.status)){
       $('spinner').hidden=true;
-      $('progress-note').textContent=status.status==='done'?'Your saved report is ready.':status.status==='cannot_assess'?'Leo could not confidently identify the company. Check the company name and website domain.':'The review stopped before completion. The report lists available findings and limitations.';
+      $('progress-note').textContent=status.status==='done'?'Your saved report is ready.':status.status==='cannot_assess'?'Leo could not confidently identify the company. Check the company name and website domain.':'The review stopped before completion. See the reason below; no investment decision was produced.';
       reportView(await request('/runs/'+encodeURIComponent(id)+'/report'));
       return;
     }
@@ -116,6 +136,7 @@ $('login').addEventListener('submit',async event=>{
   catch(e){if(e.name!=='AbortError')error(e.message);}finally{button.disabled=false;}
 });
 $('signout').addEventListener('click',signOut);
+$('retry-review').addEventListener('click',()=>review(async()=>{const original=activeRun;$('result').hidden=true;$('phase').textContent='Starting a new review of the saved PDF';$('spinner').hidden=false;try{const result=await request('/runs/'+encodeURIComponent(original)+'/retry',{method:'POST'});await monitor(result.run_id);}catch(e){if(savedReport)$('result').hidden=false;throw e;}}));
 $('upload').addEventListener('submit',event=>{event.preventDefault();const form=new FormData(event.target);review(async()=>{const file=form.get('deck');if(!file.size||file.size>20*1024*1024||!file.name.toLowerCase().endsWith('.pdf'))throw new Error('Choose a nonempty PDF no larger than 20 MB.');$('progress-panel').hidden=false;$('phase').textContent='Uploading your pitch deck';$('spinner').hidden=false;$('run-label').textContent='';$('agents').replaceChildren();$('result').hidden=true;const response=await request('/runs',{method:'POST',body:form});await monitor(response.run_id);});});
 $('resume').addEventListener('submit',event=>{event.preventDefault();review(()=>monitor($('run-id').value.trim()));});
 async function download(format){
