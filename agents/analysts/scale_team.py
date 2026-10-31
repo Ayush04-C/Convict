@@ -137,7 +137,8 @@ def compute_growth(claim: Claim | None, data: dict) -> CheckResult:
     if abs(gap) <= GROWTH_VERIFIED_PP:
         return result("VERIFIED", 1, detail)
     if gap < 0 or abs(gap) <= GROWTH_PARTIAL_PP:
-        return result("PARTIAL", 2, f"{detail} Deck understates or is within 25 points.")
+        side = "Deck understates growth." if gap < 0 else f"Deck overstates by {gap:.0f} points."
+        return result("PARTIAL", 2, f"{detail} {side}")
     if 0 < base < GROWTH_MIN_BASE:
         return result("PARTIAL", 2, f"{detail} Base of {base:.0f} people is too small to contradict.")
     return result("CONTRADICTED", 4 if gap > 100 else 3, f"{detail} Deck overstates growth.")
