@@ -234,3 +234,19 @@ async def test_web_discards_malformed_urls_and_unrelated_company_names():
     wrong["company_data"]["basic_info"]["name"] = "Unrelated business"
     c = client(response(), response(wrong), urls=("https://[broken", "https://example.com"))
     assert (await resolve_company("Synthetic", None, claims(), c)).status == "cannot_assess"
+
+
+@pytest.mark.parametrize(
+    "hq,country",
+    [
+        ("USA", "USA"),
+        ("United States", "USA"),
+        ("San Francisco, US", "USA"),
+        ("UK", "GBR"),
+        ("India", "IND"),
+    ],
+)
+async def test_hq_country_aliases_are_normalized_on_both_sides(hq, country):
+    deck = claims(("identity_founding", 2020), ("identity_hq", hq))
+    c = client(response(match(score=0.6, country=country), match(2, 0.6, "other.com", 2010, "AUS")))
+    assert (await resolve_company("Synthetic", None, deck, c)).company_id == 1

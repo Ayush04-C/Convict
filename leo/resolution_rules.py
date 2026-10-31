@@ -134,6 +134,8 @@ def matching_attributes(candidate: Candidate, attributes: dict, domain: str | No
         matches.append("founding_year")
     if "hq" in attributes:
         expected = attributes["hq"]
+        for alias, country_name in sorted(COUNTRIES.items(), key=lambda pair: -len(pair[0])):
+            expected = re.sub(r"\b" + re.escape(alias) + r"\b", country_name, expected)
         country = normalized(location.get("country") or "")
         country = COUNTRIES.get(country, country)
         city = normalized(location.get("city") or "")
