@@ -10,8 +10,12 @@
   <main>
     <section class="intro"><p class="eyebrow">FROM PITCH TO PERSPECTIVE</p><h1>A clearer look at<br>the company behind the deck.</h1><p>Upload a pitch deck. Leo checks its claims against company data and brings the findings into one report.</p></section>
     <p id="error" class="error" role="alert" hidden></p>
-    <section id="login-panel" class="panel narrow"><h2>Sign in to your workspace</h2><p>Use the demo account configured for this Leo server.</p>
-      <form id="login"><label>Username<input id="username" name="username" autocomplete="username" required maxlength="100" value="ayush"></label><label>Password<input id="password" name="password" type="password" autocomplete="current-password" required maxlength="1024"></label><button type="submit">Sign in <span aria-hidden="true">→</span></button></form>
+    <section id="login-panel" class="panel narrow"><h2>Sign in to your workspace</h2><p>Sign in, or <a href="#" id="show-signup">create an account</a>.</p>
+      <form id="login"><label>Username<input id="username" name="username" autocomplete="username" required maxlength="100"></label><label>Password<input id="password" name="password" type="password" autocomplete="current-password" required maxlength="1024"></label><button type="submit">Sign in <span aria-hidden="true">→</span></button></form>
+      <p class="muted">Just looking? <button id="demo-login" type="button" class="secondary">Use the demo account</button></p>
+    </section>
+    <section id="signup-panel" class="panel narrow" hidden><h2>Create your account</h2><p>Already have one? <a href="#" id="show-login">Sign in</a>.</p>
+      <form id="signup"><label>Username<input id="signup-username" name="username" autocomplete="username" required minlength="3" maxlength="32" pattern="[A-Za-z0-9][A-Za-z0-9_.\-]{2,31}"><small>3 to 32 characters: letters, digits, dot, dash or underscore.</small></label><label>Password<input id="signup-password" name="password" type="password" autocomplete="new-password" required minlength="10" maxlength="1024"><small>At least 10 characters.</small></label><button type="submit">Create account <span aria-hidden="true">→</span></button></form>
     </section>
     <section id="workspace" hidden>
       <section class="panel" id="upload-panel"><div class="section-title"><div><p class="eyebrow">NEW REVIEW</p><h2>Start with a pitch deck</h2></div><span class="muted">PDF · up to 20 MB</span></div>

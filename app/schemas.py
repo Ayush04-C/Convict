@@ -59,6 +59,11 @@ class LoginRequest(FrozenModel):
     password: SecretStr = Field(min_length=1, max_length=1024)
 
 
+class SignupRequest(FrozenModel):
+    username: str = Field(strict=True, min_length=1, max_length=100)
+    password: SecretStr = Field(min_length=1, max_length=1024)
+
+
 class TokenResponse(FrozenModel):
     access_token: str
     token_type: Literal["bearer"] = "bearer"
