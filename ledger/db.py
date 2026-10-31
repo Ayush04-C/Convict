@@ -47,12 +47,15 @@ async def transaction(db):
 
 async def initialize(path: str | Path) -> None:
     path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        raise LedgerStorageError("Cannot create ledger directory; check file permissions.") from None
     async with connection(path, create=True) as db:
         version = (await db.execute_fetchall("PRAGMA user_version"))[0][0]
         if version > SCHEMA_VERSION:
             raise LedgerStorageError("Ledger schema is newer than this application supports.")
-        await db.execute("PRAGMA journal_mode = WAL")
+        await db.execute_fetchall("PRAGMA journal_mode = WAL")
         schema = Path(__file__).with_name("models.sql").read_text()
         try:
             # Version 0 is the supplied skeleton; v1 adds metadata and indexes.
