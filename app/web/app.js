@@ -13,7 +13,7 @@ const date = value => {if(!value)return 'Not supplied by provider'; const parsed
 function node(tag, content, className){const el=document.createElement(tag);if(content!=null)el.textContent=content;if(className)el.className=className;return el;}
 function error(message){$('error').textContent=message;$('error').hidden=!message;}
 function setBusy(value){busy=value;$('upload-fields').disabled=value;$('resume-button').disabled=value;$('retry-review').disabled=value;}
-function signOut(){session.abort();session=new AbortController();token='';savedReport=null;activeRun='';setBusy(false);$('workspace').hidden=true;$('login-panel').hidden=false;$('signout').hidden=true;$('result').hidden=true;$('progress-panel').hidden=true;$('report-content').replaceChildren();$('run-id').value='';$('password').value='';error('');}
+function signOut(){session.abort();session=new AbortController();token='';savedReport=null;activeRun='';setBusy(false);$('workspace').hidden=true;$('login-panel').hidden=false;$('signup-panel').hidden=true;$('signup-password').value='';$('signout').hidden=true;$('result').hidden=true;$('progress-panel').hidden=true;$('report-content').replaceChildren();$('run-id').value='';$('password').value='';error('');}
 async function request(path, options={}){
   const controller=new AbortController(), signal=session.signal;
   const cancel=()=>controller.abort();signal.addEventListener('abort',cancel,{once:true});
@@ -132,7 +132,15 @@ async function monitor(id){
 async function review(action){if(busy)return;setBusy(true);error('');$('progress-note').textContent='This can take several minutes. Progress comes from the server.';try{await action();}catch(e){if(e.name!=='AbortError')error(e.message);}finally{setBusy(false);$('spinner').hidden=true;}}
 $('login').addEventListener('submit',async event=>{
   event.preventDefault();error('');const button=event.submitter;button.disabled=true;
-  try{const result=await request('/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:$('username').value,password:$('password').value})});token=result.access_token;$('password').value='';$('login-panel').hidden=true;$('workspace').hidden=false;$('signout').hidden=false;}
+  try{const result=await request('/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:$('username').value,password:$('password').value})});enter(result);}
+  catch(e){if(e.name!=='AbortError')error(e.message);}finally{button.disabled=false;}
+});
+function enter(result){token=result.access_token;$('password').value='';$('signup-password').value='';$('login-panel').hidden=true;$('signup-panel').hidden=true;$('workspace').hidden=false;$('signout').hidden=false;}
+$('show-signup').addEventListener('click',event=>{event.preventDefault();error('');$('login-panel').hidden=true;$('signup-panel').hidden=false;$('signup-username').focus();});
+$('show-login').addEventListener('click',event=>{event.preventDefault();error('');$('signup-panel').hidden=true;$('login-panel').hidden=false;$('username').focus();});
+$('signup').addEventListener('submit',async event=>{
+  event.preventDefault();error('');const button=event.submitter;button.disabled=true;
+  try{enter(await request('/auth/signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:$('signup-username').value,password:$('signup-password').value})}));}
   catch(e){if(e.name!=='AbortError')error(e.message);}finally{button.disabled=false;}
 });
 $('signout').addEventListener('click',signOut);

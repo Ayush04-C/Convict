@@ -83,7 +83,7 @@ Then open `.env` and set `GEMINI_API_KEY`, `CRUSTDATA_API_KEY` and the three mod
 MODE=live make run
 ```
 
-Open **http://127.0.0.1:8000/**, sign in as `maya`, choose a PDF (a ready-made one is in `demo/decks/`), and enter the company name, its domain and your maximum check size. The page shows each phase and each specialist as they run, then the recommendation, the claim checks and the sources, with Markdown and JSON downloads. Copy the run ID to reopen a report later; reopening does not start another analysis.
+Open **http://127.0.0.1:8000/**, sign in as `maya` (or choose **create an account**; usernames are 3 to 32 characters, passwords at least 10, and each account sees only its own reviews), choose a PDF (a ready-made one is in `demo/decks/`), and enter the company name, its domain and your maximum check size. The page shows each phase and each specialist as they run, then the recommendation, the claim checks and the sources, with Markdown and JSON downloads. Copy the run ID to reopen a report later; reopening does not start another analysis.
 
 Or use the CLI in a second terminal. Options such as `--output` and `--username` come before `run`:
 
