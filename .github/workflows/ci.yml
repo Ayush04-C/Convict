@@ -16,3 +16,4 @@ jobs:
       - run: python -m scripts.provider_demo
       - run: python -m scripts.context_demo
       - run: python -m scripts.context_demo --timeout-agent
+      - run: python -m scripts.api_demo

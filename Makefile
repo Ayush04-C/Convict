@@ -1,6 +1,8 @@
 PYTHON ?= python
 
-.PHONY: run test lint demo auth-setup ledger-init ledger-demo provider-demo context-demo
+.PHONY: run test lint demo auth-setup ledger-init ledger-demo provider-demo context-demo api-demo
+api-demo:
+	$(PYTHON) -m scripts.api_demo
 context-demo:
 	$(PYTHON) -m scripts.context_demo
 provider-demo:
