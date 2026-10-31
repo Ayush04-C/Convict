@@ -1,0 +1,39 @@
+# Daksh handoff
+
+1. Clone the shared repository after the foundation PR is merged, or check out
+   the foundation branch explicitly while it is under review.
+2. Follow README setup and install `requirements-features.txt` for live features.
+3. Run `make test`, `make lint`, `make demo` before changing code.
+4. Read `app/schemas.py`, `agents/protocol.py`, `tests/fakes.py`, and `docs/contracts.md`.
+5. Read low-level reference sections 5, 8 and 9.
+6. Create `feat/daksh-claim-extraction`; edit only your paths in `docs/ownership.md`.
+
+## Stable replacement points
+
+| File | Export |
+|---|---|
+| `ingest/pdf_parser.py` | async `parse_deck(path: str) -> DeckContent` |
+| `ingest/claim_extractor.py` | async `extract_claims(deck: DeckContent) -> ClaimSet` |
+| `ingest/normalize.py` | async `normalize_claims(claims: ClaimSet) -> ClaimSet` |
+| `agents/identity.py` | `IdentityAgent` |
+| `agents/scale_team.py` | `ScaleTeamAgent` |
+| `agents/funding.py` | `FundingAgent` |
+| `agents/traction.py` | `TractionAgent` |
+| `leo/adjudicator.py` | async `adjudicate(run_id: str) -> AdjudicationResult` |
+
+Every specialist implements the three methods in SpecialistAgent. The registry
+does not change. Remove stub markers only when a path actually performs real work.
+Analysts are pure Python; their HTTP dependencies go through scoped tools outside
+the analyst module. Use the approved fixed ingestion exchange rate from config
+when normalization is implemented; do not silently assume a rate.
+
+## What is unfinished
+
+The real LedgerRepository, scoped writer/tool enforcement, live providers,
+authentication and persistent orchestration are declared but not implemented.
+Their methods intentionally raise NotImplementedError. API stubs return 501.
+The current FakeLedger supports specialist stub writes only; do not mistake it
+for complete challenge/evidence test support. Extend support through Ayush as
+your feature tests require it. Live SDK dependencies/model names are unverified.
+
+The standalone offline harness is for smoke checks, not a submitted live pipeline.
