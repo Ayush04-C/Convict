@@ -81,7 +81,7 @@ def create_app(
     app = FastAPI(
         title="Leo API",
         version="0.5.0",
-        description="Authenticated upload, pipeline, status, SSE and saved reports. Chat is deferred.",
+        description="Authenticated upload, pipeline, status, SSE and saved reports.",
         lifespan=lifespan,
     )
     app.state.settings = settings
@@ -109,7 +109,7 @@ def create_app(
             "pipeline": True,
             "report": True,
             "limitations": [
-                "Real lead adjudication remains unfinished; reports preserve saved outcomes and stub provenance."
+                "Revenue figures are Crustdata estimates, and EBITDA and profit are not available from this data."
             ],
         }
 

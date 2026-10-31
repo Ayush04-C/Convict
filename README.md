@@ -9,8 +9,8 @@ Provider clients, response caching and structured Gemini output are implemented.
 Company resolution, isolated context packets and sandbox phase execution are implemented.
 PDF extraction, persistent orchestration, authenticated upload, status and SSE are
 implemented. Saved company reports are available as JSON/Markdown and through the
-CLI. The real lead adjudicator remains Daksh's work; chat is deferred. Stub components
-stay explicitly labelled. Reporting does not change scoring formulas or saved scores.
+CLI. The real lead adjudicator (dispute rulings, a grounded narrative and evidence-backed
+hard gates) is implemented, and there is no chat feature. Stub components stay explicitly labelled. Reporting does not change scoring formulas or saved scores.
 
 ## Quick start
 

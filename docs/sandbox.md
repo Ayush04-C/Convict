@@ -43,8 +43,8 @@ This is cooperative async isolation for trusted Python specialists. It is not
 process/memory isolation or a hard stop for blocking code that ignores cancellation.
 Private Python attributes are not a security boundary. No generated code is run.
 The pipeline now supplies live specialists and coordinates phase advancement and
-barriers; see `pipeline-api.md`. Real lead adjudication and final reporting remain
-unfinished. Round-one analyst math comes from Daksh's specialist implementation.
+barriers; see `pipeline-api.md`. Lead adjudication (`adjudicator.md`) and saved reports are
+implemented. Round-one analyst math comes from Daksh's specialist implementation.
 
 ```sh
 python -m pytest tests/test_scoped_tools.py tests/test_sandbox.py

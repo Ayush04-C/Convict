@@ -1,8 +1,8 @@
 # Ayush implementation stages
 
 Foundation, authentication, ledger, providers, resolution/context and sandbox
-execution, pipeline coordination and run APIs are implemented. Real lead
-adjudication remains Daksh's work. Saved reports and authenticated CLI are implemented;
+execution, pipeline coordination and run APIs are implemented. The real lead
+adjudicator is implemented (`adjudicator.md`). Saved reports and authenticated CLI are implemented;
 scoring formulas are unchanged. Test starter docstrings do not count
 as implemented tests. See `authentication.md` for setup and manual verification.
 
@@ -17,7 +17,7 @@ as implemented tests. See `authentication.md` for setup and manual verification.
 | Pipeline (implemented) | Phase controller, barriers, live agent wiring, confirmed gates and persistent run | Run saves a decision; failures are reflected honestly |
 | API (implemented) | Upload, status, event stream/replay, saved reports and owner checks | Authenticated client completes a run; other owners cannot access it |
 | Report/CLI (implemented) | Project existing saved scores, gates, findings, dates and debate into JSON/Markdown | No scoring recalculation; API and CLI preserve the same decision |
-| Chat/demo (deferred) | Grounded chat; minimal UI only if time permits | Evidence-only answers, repeatable honest/inflated/fake-company demo |
+| Demo | CLI and saved report only; no frontend and no chat | Repeatable honest/inflated/fake-company demo from the CLI |
 | Submission (later) | Record, document, submit after integration | Green checks, clear limits, under-two-minute recording |
 
 Recalculate timeboxes against the actual 3:30 PM deadline; the original schedule

@@ -41,7 +41,7 @@ successful GitHub Actions run.
 
 This is a foundation skeleton, not a complete diligence product. Live authentication,
 PDF extraction, provider requests, ledger repository operations, sandbox enforcement,
-persistent orchestration, run/report endpoints, and chat remain unfinished.
+persistent orchestration, and run/report endpoints remain unfinished.
 
 Fixtures are synthetic; real provider fixtures and SDK/model compatibility still
 need verification. Test starter files contain no tests and are not counted in the

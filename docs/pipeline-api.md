@@ -109,10 +109,11 @@ The managed extraction adapter preserves Gemini's document path and the optional
 configured BharatCode outage fallback. Agent models are supplied from application
 settings rather than re-reading the developer environment during tests.
 
-The real lead adjudicator is still Daksh-owned unfinished work. Its current stub
-marks resulting decisions `is_stub=true`, even when ingestion and specialists are
-real. This limitation is visible in `/health` and in saved reports. Chat remains
-deferred and returns 501. Scoring formulas and thresholds are unchanged.
+The lead adjudicator is real (`leo/adjudicator.py`, see `adjudicator.md`). The orchestrator hands
+it the ledger, the model client and `MODEL_PRO`, and applies only the revisions it has not already
+stored. If the model is unavailable it falls back to a deterministic narrative and a decision is
+marked `is_stub=true` only when the claims, dossier, findings or verdicts are themselves synthetic.
+There is no chat feature. Scoring formulas and thresholds are unchanged.
 
 ## Company reports and CLI
 

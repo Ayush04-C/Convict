@@ -94,4 +94,4 @@ The provider group contains 91 cases, adding coverage to the previous
 ## Scope
 
 No Daksh-owned source files or real credentials are included. See
-`docs/providers.md` for manual smoke commands. Chat and submission work remain deferred.
+`docs/providers.md` for manual smoke commands. Submission work remains deferred.
