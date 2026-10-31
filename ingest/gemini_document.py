@@ -8,6 +8,7 @@ provider rejected our input) from "give up now" (overload, rate limit, bad key o
 import asyncio
 from collections.abc import Sequence
 
+import httpx
 from pydantic import BaseModel
 
 from ingest.claim_extractor import ExtractionError, ProviderUnavailableError
@@ -42,8 +43,10 @@ class GeminiDocumentExtractor:
             response = await asyncio.wait_for(
                 self._client.aio.models.generate_content(model=model, contents=contents, config=config),
                 timeout=self._hard_cap_s)
-        except (TimeoutError, asyncio.TimeoutError):
+        except (TimeoutError, asyncio.TimeoutError, httpx.TimeoutException):
             raise ProviderUnavailableError("Gemini did not answer in time; try again shortly.") from None
+        except httpx.TransportError:
+            raise ProviderUnavailableError("Could not reach Gemini (network error); try again.") from None
         except errors.APIError as exc:
             code = getattr(exc, "code", None)
             if code in CONFIG_CODES:
