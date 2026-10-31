@@ -111,6 +111,47 @@ settings rather than re-reading the developer environment during tests.
 
 The real lead adjudicator is still Daksh-owned unfinished work. Its current stub
 marks resulting decisions `is_stub=true`, even when ingestion and specialists are
-real. This limitation is visible in `/health`. Final scoring/report integration
-remains next. `/report` returns 409 while processing and explicit 501 afterward;
-chat remains deferred and returns 501. Both enforce run ownership.
+real. This limitation is visible in `/health` and in saved reports. Chat remains
+deferred and returns 501. Scoring formulas and thresholds are unchanged.
+
+## Company reports and CLI
+
+`GET /runs/{run_id}/report` returns an owned terminal run's JSON report. Add
+`?format=markdown` for the same information as Markdown. Both are non-cacheable.
+Processing runs return 409. Failed/unresolved runs return a partial report with
+no invented decision, score or check size. Unknown/other-owner runs return 404.
+
+Reports include the exact saved decision, confirmed gates and citations, claim
+findings with effective severity, recorded metrics, specialist verdicts/statuses,
+debate/revisions and the stored lead narrative. PASS is labelled DO NOT INVEST;
+the raw saved verdict is preserved. Synthetic/unfinished results are prominent.
+No extra model call or new scoring computation is performed to generate a report.
+
+Source dates distinguish the agent's recorded timestamp from the original provider
+retrieval time where the cited value matches the run's saved dossier. Old reports
+never read a newly refreshed cache. Full dossier payloads remain in the ledger;
+the report exposes cited field values and a dossier reference. Large Markdown
+values are labelled previews; JSON retains the cited values. Deck/provider text
+is escaped in Markdown and terminal controls are removed.
+
+Run the API with `make run`, then from a second activated terminal:
+
+```sh
+python -m scripts.leo_cli --username ayush run \
+  --deck /path/to/deck.pdf --company "Company name" \
+  --domain example.com --max-check-usd 100000 --stage seed
+
+python -m scripts.leo_cli --username ayush --format json report RUN_ID
+python -m scripts.leo_cli --username ayush --output company-report.md report RUN_ID
+```
+
+The password prompt is hidden. An optional `LEO_ACCESS_TOKEN` environment variable
+can supply an existing token without prompting; never put credentials in the API
+URL. Global options (`--base-url`, `--format`, `--output`, `--timeout`) precede
+`run`/`report`. The default wait timeout is 600 seconds. Report export creates a
+new file with permissions 0600 and refuses to overwrite existing files. Without
+`--output`, it prints to the terminal. A failed run exits with code 1.
+
+In MODE=stub the CLI output remains explicitly synthetic. For real deck extraction
+use MODE=live and valid provider settings. API/CLI tests use offline dependencies
+and are included in the existing full-suite workflow.

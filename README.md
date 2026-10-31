@@ -8,8 +8,9 @@ specialists, offline demos, and deterministic scoring.
 Provider clients, response caching and structured Gemini output are implemented.
 Company resolution, isolated context packets and sandbox phase execution are implemented.
 PDF extraction, persistent orchestration, authenticated upload, status and SSE are
-implemented. The real lead adjudicator and final scoring/report integration remain
-unfinished; chat is deferred. Stub components stay explicitly labelled.
+implemented. Saved company reports are available as JSON/Markdown and through the
+CLI. The real lead adjudicator remains Daksh's work; chat is deferred. Stub components
+stay explicitly labelled. Reporting does not change scoring formulas or saved scores.
 
 ## Quick start
 
@@ -51,6 +52,9 @@ three surviving workers. See [resolution/context](docs/resolution-context.md) an
 specialists. Run `make api-demo` for the complete offline login/upload/pipeline/SSE
 flow. See [pipeline/API](docs/pipeline-api.md) for Postman fields, live-mode setup,
 error behavior and the single-process execution limit.
+
+Use `python -m scripts.leo_cli --help` for authenticated CLI analysis/report export.
+The CLI uses the same API and saved decision; it never recalculates a score.
 
 See [contracts](docs/contracts.md), [ownership](docs/ownership.md),
 [implementation stages](docs/ayush-stages.md), and [handoff](docs/handoff.md).

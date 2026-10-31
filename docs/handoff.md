@@ -38,8 +38,9 @@ Specialists receive per-phase `LedgerPort`/`ToolPort` capabilities; keep using t
 protocols rather than assuming the concrete writer class or retaining capabilities
 between phases. Persistent orchestration, upload, status and SSE are implemented;
 see `docs/pipeline-api.md`. The coordinator confirms gate proposals from original
-dossier facts and same-run citations before scoring. Real lead adjudication and
-report integration remain unfinished; these are visible limitations.
+dossier facts and same-run citations before scoring. Saved JSON/Markdown reports
+and authenticated CLI are implemented without changing scoring formulas. Real lead
+adjudication remains Daksh's work; stub narratives stay visibly labelled.
 The current FakeLedger supports specialist stub writes only; do not mistake it
 for complete challenge/evidence test support. Extend support through Ayush as
 your feature tests require it. Default dependencies include Google GenAI and
