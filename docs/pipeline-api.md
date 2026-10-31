@@ -127,6 +127,11 @@ debate/revisions and the stored lead narrative. PASS is labelled DO NOT INVEST;
 the raw saved verdict is preserved. Synthetic/unfinished results are prominent.
 No extra model call or new scoring computation is performed to generate a report.
 
+New runs include the saved `scoring_breakdown`: claim credits, dimension weights,
+confidence components, applied caps and sizing inputs. See `scoring.md`. Older
+decisions remain unchanged and show no saved breakdown; they are never backfilled
+by recalculation.
+
 Source dates distinguish the agent's recorded timestamp from the original provider
 retrieval time where the cited value matches the run's saved dossier. Old reports
 never read a newly refreshed cache. Full dossier payloads remain in the ledger;

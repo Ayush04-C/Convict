@@ -138,6 +138,7 @@ async def build_report(run_id: str, repo: LedgerRepository) -> dict:
         },
         "policy": run["policy"].model_dump(),
         "decision": decision.model_dump() if decision else None,
+        "scoring_breakdown": await repo.get_scoring_breakdown(run_id) if decision else None,
         "verdict_label": LABELS[decision.verdict]
         if decision
         else "CANNOT ASSESS"
