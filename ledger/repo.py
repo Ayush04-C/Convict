@@ -237,7 +237,14 @@ class LedgerRepository:
             await asyncio.sleep(min(0.025, remaining))
 
     async def set_agent_status(
-        self, run_id: str, agent: AgentName, phase: Phase, state: str, error: str | None = None
+        self,
+        run_id: str,
+        agent: AgentName,
+        phase: Phase,
+        state: str,
+        error: str | None = None,
+        *,
+        exclusive: bool = False,
     ) -> None:
         if (
             agent not in AGENTS
@@ -255,6 +262,8 @@ class LedgerRepository:
                 (run_id, agent, phase),
             )
             if previous and previous["state"] == state:
+                if exclusive:
+                    raise LedgerConflict("Agent phase execution is already claimed.")
                 return
             allowed = {
                 None: {"PENDING", "RUNNING", "FAILED"},
