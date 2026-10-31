@@ -43,6 +43,7 @@ async def build_report(run_id: str, repo: LedgerRepository) -> dict:
     adjudication = await repo.get_adjudication(run_id) if decision else None
     resolved = await repo.latest_event(run_id, "resolution_saved")
     failed = await repo.latest_event(run_id, "run_failed")
+    extraction_failure = await repo.latest_event(run_id, "extraction_failed")
     dossier = next(
         (
             e
@@ -164,6 +165,9 @@ async def build_report(run_id: str, repo: LedgerRepository) -> dict:
         "sizing_label": "Policy-based sizing from the fund's own rules, not financial advice.",
         "resolution": json.loads(resolved.payload_json) if resolved else None,
         "failure_code": json.loads(failed.payload_json)["code"] if failed else None,
+        "failure_details": json.loads(extraction_failure.payload_json)
+        if extraction_failure
+        else None,
         "claims": by_claim,
         "findings": [f.model_dump() for f in findings],
         "metrics": [m.model_dump() for m in metrics],

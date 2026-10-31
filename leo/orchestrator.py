@@ -8,6 +8,7 @@ from crustdata.client import CrustdataError
 from crustdata.dossier import build_dossier, dossier_evidence
 from ingest.pdf_parser import DeckRejectedError
 from ingest.claim_extractor import ExtractionError
+from app.failures import extraction_failure
 from ledger.errors import LedgerError
 from ledger.repo import LedgerRepository, STATUS
 from leo.context import AGENTS, build_context_packets
@@ -35,7 +36,8 @@ async def run_pipeline(
         await repo.fail_run(run_id, "PIPELINE_TIMEOUT")
     except DeckRejectedError:
         await repo.fail_run(run_id, "DECK_REJECTED")
-    except ExtractionError:
+    except ExtractionError as error:
+        await repo.add_event(run_id, "extraction_failed", extraction_failure(error))
         await repo.fail_run(run_id, "EXTRACTION_FAILED")
     except CrustdataError:
         await repo.fail_run(run_id, "PROVIDER_FAILED")
