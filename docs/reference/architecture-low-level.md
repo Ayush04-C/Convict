@@ -45,7 +45,7 @@ HTTPS note: `uvicorn` on localhost serves HTTP. HTTPS only appears if we deploy 
 | Config | `.env` via `pydantic-settings` |
 
 Gemini models: you have three. Placeholders below, swap in your real names:
-- **MODEL_FAST** (cheapest): Round 2 challenges, the ledger-grounded chat
+- **MODEL_FAST** (cheapest): Round 2 challenges
 - **MODEL_MID**: ingestion and claim extraction (needs vision), Round 1 agents, agent verdicts
 - **MODEL_PRO** (strongest): Leo's adjudication and final narrative
 
@@ -108,7 +108,6 @@ leo/
 | `GET /runs/{run_id}/events` | JWT | SSE stream of ledger events (agent started, finding written, challenge, verdict, done) |
 | `GET /runs/{run_id}` | JWT | status plus final decision when done |
 | `GET /runs/{run_id}/report` | JWT | full report JSON (the frontend renders it) |
-| `POST /runs/{run_id}/chat` | JWT | body `{question}`, answers only from ledger evidence |
 
 SSE and JWT: the browser `EventSource` cannot send an `Authorization` header. Use `fetch`-based SSE on the frontend (VERIFY AT BUILD), not a token in the URL.
 
@@ -508,7 +507,7 @@ flowchart TB
     M --> DEC["decisions row:<br/>verdict, check size, breakdown, narrative"]
 ```
 
-Gemini call budget per run: 1 (extraction) + 4 + 4 + 4 + 1 = **14 calls**. Chat mode adds 1 call per question.
+Gemini call budget per run: 1 (extraction) + 4 + 4 + 4 + 1 = **14 calls**.
 
 Scoring formulas:
 

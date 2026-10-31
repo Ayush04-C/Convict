@@ -85,14 +85,11 @@ flowchart TB
 
     subgraph OUT["7. OUTPUT TO USER"]
         direction LR
-        RPT["Diligence Brief<br/>verdict, claim vs reality,<br/>signals, culture, debate log,<br/>unverified items,<br/>questions for founders,<br/>evidence appendix"]
-        CHAT["Chat Mode<br/>answers only from ledger evidence"]
+        RPT["Diligence Brief<br/>verdict, claim vs reality,<br/>signals, culture, debate log,<br/>unverified items,<br/>evidence appendix"]
     end
     DEC --> RPT
     LG --> RPT
-    LG --> CHAT
-    RPT --> U2(["Investor reads report<br/>and asks follow-ups"])
-    CHAT --> U2
+    RPT --> U2(["Investor reads the report"])
 ```
 
 ## Where agent results live

@@ -155,7 +155,7 @@ async def test_token_tampering_rejected(client, auth_settings):
 
 
 @pytest.mark.parametrize("path,method", [("/runs", "post"), ("/runs/r", "get"),
-    ("/runs/r/events", "get"), ("/runs/r/report", "get"), ("/runs/r/chat", "post")])
+    ("/runs/r/events", "get"), ("/runs/r/report", "get")])
 async def test_every_run_route_requires_authentication(client, auth_settings, path, method):
     assert_unauthorized(await getattr(client, method)(path))
     token = create_access_token("test-user", auth_settings)

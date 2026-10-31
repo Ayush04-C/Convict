@@ -19,7 +19,7 @@
 | `agents/scale_team.py` | `ScaleTeamAgent` |
 | `agents/funding.py` | `FundingAgent` |
 | `agents/traction.py` | `TractionAgent` |
-| `leo/adjudicator.py` | async `adjudicate(run_id: str) -> AdjudicationResult` |
+| `leo/adjudicator.py` | async `adjudicate(run_id, *, repo=None, llm=None, model=None) -> AdjudicationResult` (a call with only a `run_id` returns the visibly stubbed result) |
 
 Every specialist implements the three methods in SpecialistAgent. The registry
 does not change. Remove stub markers only when a path actually performs real work.
@@ -40,7 +40,8 @@ between phases. Persistent orchestration, upload, status and SSE are implemented
 see `docs/pipeline-api.md`. The coordinator confirms gate proposals from original
 dossier facts and same-run citations before scoring. Saved JSON/Markdown reports
 and authenticated CLI are implemented without changing scoring formulas. Real lead
-adjudication remains Daksh's work; stub narratives stay visibly labelled.
+adjudication is implemented in `leo/adjudicator.py` (see `docs/adjudicator.md`); stub narratives stay
+visibly labelled.
 The current FakeLedger supports specialist stub writes only; do not mistake it
 for complete challenge/evidence test support. Extend support through Ayush as
 your feature tests require it. Default dependencies include Google GenAI and

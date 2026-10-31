@@ -45,7 +45,7 @@ Auth responses use `Cache-Control: no-store` and `Pragma: no-cache`.
 
 Send `Authorization: Bearer <access_token>` on protected requests.
 `GET /auth/me` returns `{"username":"ayush"}` for the configured user.
-All `/runs` routes require this dependency, including events, report and chat.
+All `/runs` routes require this dependency, including events and report.
 Public endpoints are login, health, API docs and the OpenAPI schema.
 
 ## Manual check in API docs

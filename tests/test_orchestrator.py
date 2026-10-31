@@ -171,7 +171,7 @@ async def test_stub_adjudication_remains_visible(ledger, execution):
 async def test_adjudication_revision_is_applied_before_decision(ledger, execution):
     run, _, deps = execution
 
-    async def adjudicate(run_id):
+    async def adjudicate(run_id, **_):
         finding = next(
             f
             for f in await ledger.get_all_findings(run_id)

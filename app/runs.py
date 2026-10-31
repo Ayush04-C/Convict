@@ -1,4 +1,4 @@
-"""Owned run upload/status and persisted event replay; reports/chat are later stages."""
+"""Owned run upload, status, persisted event replay and saved reports."""
 
 import asyncio
 import json
@@ -195,8 +195,3 @@ async def report(
         )
     return JSONResponse(result, headers={"Cache-Control": "no-store"})
 
-
-@router.post("/{run_id}/chat")
-async def chat(run_id: str, request: Request, user: str = Depends(get_current_user)):
-    await owned(request, run_id, user)
-    raise ApiError(501, "CHAT_DEFERRED", "Chat is deferred.")

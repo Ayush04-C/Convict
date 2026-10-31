@@ -22,7 +22,7 @@ completed authentication and unfinished analysis explicit.
 - Require and validate token claims, signature, algorithm, configured user,
   timestamps and a maximum one-hour lifetime.
 - Apply the shared authentication dependency to run creation, status, events,
-  reports and chat routes.
+  and report routes.
 - Return generic 401 responses with a bearer challenge, sanitized validation
   errors, request IDs and non-cacheable authentication responses.
 - Require valid auth configuration at API startup without requiring provider keys.
@@ -56,6 +56,6 @@ are not implemented. Changing the password does not invalidate already issued
 tokens; rotating the signing secret and restarting invalidates them.
 
 Ledger-backed run ownership, persistent orchestration, live extraction/providers,
-and functional run/report/chat endpoints belong to subsequent stages. No Daksh
+and functional run/report endpoints belong to subsequent stages. No Daksh
 feature files are changed. Local secret files and the unrelated working-copy edit
 to `docs/foundation-pr.md` are excluded from this PR.
