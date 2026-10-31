@@ -27,7 +27,18 @@ make demo
 make run
 ```
 
-`make run` serves HTTP on localhost:8000; `/health` and `/docs` are available.
+`make run` serves the upload interface at http://127.0.0.1:8000/; `/health` and `/docs` are available.
+Sign in with your configured demo account, choose a PDF (up to 20 MB), and enter
+the company name, website domain, fund investment limit in USD, and company stage.
+The page shows actual pipeline phases and all four specialist states, then the saved
+recommendation, claim checks, and source summaries. Download the complete Markdown
+or JSON report. Copy the run ID to reopen a report after refreshing or signing in again;
+reopening does not start another analysis. Keep the server running while it works.
+`MODE=live` uses configured providers; `MODE=stub` is explicitly labelled synthetic.
+Provider API keys stay on the server. The browser holds its access token only in memory
+and clears the report on sign-out. Closing the page does not cancel a running review.
+Missing provider update dates mean the source supplied no update timestamp; retrieval
+time is a separate field and does not establish when the source record last changed.
 Configure your demo password once through the hidden prompt; repeat setup preserves
 existing credentials and provider keys. API startup requires valid auth settings.
 See [authentication](docs/authentication.md) for manual testing and expected responses.
