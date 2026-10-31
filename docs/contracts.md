@@ -17,8 +17,11 @@ paths retain their original layout. Implementations must use these contracts.
 - Enable foreign keys per connection. All IDs referenced by a write must belong to
   the same run. Enforce write ownership and phase visibility in LedgerWriter.
 
-The schema is initialized by `ledger.db.initialize`; repository functions are
-declared now and implemented in the next ledger stage.
+The schema is initialized by `ledger.db.initialize`; repository operations and
+the bound writer are implemented. See `ledger.md` for transactional access rules.
+`LedgerPort.get_evidence()` is an additive read helper: own/coordinator evidence
+before the round-one barrier and shared evidence afterward. Claim-set metadata is
+stored separately to preserve company name and stub provenance, including empty sets.
 
 ## Ingestion signatures
 

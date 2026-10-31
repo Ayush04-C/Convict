@@ -6,6 +6,12 @@ from app.schemas import AgentName, Finding, Verdict
 class StubSpecialist:
     name: AgentName
 
+    def __init__(self, name: AgentName | None = None):
+        if name is not None:
+            self.name = name
+        if getattr(self, "name", None) not in ("identity", "scale_team", "funding", "traction"):
+            raise ValueError("A known specialist name is required for the stub")
+
     async def run_round1(self, ctx: AgentContext) -> None:
         if ctx.packet.agent != self.name:
             raise ValueError("Context belongs to another specialist")

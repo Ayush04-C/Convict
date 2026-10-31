@@ -1,4 +1,5 @@
 """Authenticated API foundation; analysis routes remain explicit placeholders."""
+from contextlib import asynccontextmanager
 from uuid import uuid4
 
 from fastapi import Depends, FastAPI, HTTPException, Request
@@ -6,14 +7,24 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from app.auth import get_current_user, router as auth_router
 from app.errors import install_handlers
 from app.settings import Settings
+from ledger.db import initialize
+from ledger.repo import LedgerRepository
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     # Tests inject isolated settings; production reads .env plus the environment.
     settings = settings if settings is not None else Settings()
     settings.require_auth_credentials()
+
+    @asynccontextmanager
+    async def lifespan(app):
+        await initialize(settings.database_path)
+        app.state.ledger = LedgerRepository(settings.database_path)
+        yield
+
     app = FastAPI(title="Leo API", version="0.2.0",
-                  description="Demo JWT authentication is implemented. Analysis routes remain stubs.")
+                  description="JWT authentication and SQLite storage are implemented. Analysis routes remain stubs.",
+                  lifespan=lifespan)
     app.state.settings = settings
     install_handlers(app)
     app.include_router(auth_router)

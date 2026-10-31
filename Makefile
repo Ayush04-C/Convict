@@ -1,6 +1,10 @@
 PYTHON ?= python
 
-.PHONY: run test lint demo auth-setup
+.PHONY: run test lint demo auth-setup ledger-init ledger-demo
+ledger-init:
+	$(PYTHON) -m scripts.init_ledger
+ledger-demo:
+	$(PYTHON) -m scripts.ledger_demo
 auth-setup:
 	$(PYTHON) -m scripts.configure_auth
 run:
