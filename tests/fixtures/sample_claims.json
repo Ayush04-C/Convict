@@ -1,0 +1,10 @@
+{
+  "company_name": "Synthetic Demo Company",
+  "is_stub": true,
+  "claims": [
+    {"id": "C1", "topic": "identity_founding", "text": "Founded in 2020", "value": 2020, "unit": "year", "slide": 1},
+    {"id": "C2", "topic": "team_size", "text": "We have 100 employees", "value": 100, "unit": "count", "slide": 2},
+    {"id": "C3", "topic": "revenue_arr", "text": "ARR is USD 10 million", "value": 10000000, "unit": "USD", "slide": 3},
+    {"id": "C4", "topic": "traction_users", "text": "We have 50000 users", "value": 50000, "unit": "count", "slide": 4}
+  ]
+}
