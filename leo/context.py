@@ -70,9 +70,9 @@ def build_context_packets(
     slices = {}
     for agent in AGENTS:
         data = json_object(dossier_slices.get(agent, "{}"))
-        if set(data) - set(DOSSIER_GROUPS[agent]):
-            raise ValueError("Dossier slice contains groups outside this specialist's scope.")
-        slices[agent] = json_text(data)
+        # Older callers supplied the complete dossier for every agent. Filter at
+        # this boundary so they remain compatible without widening packet access.
+        slices[agent] = json_text({key: data[key] for key in DOSSIER_GROUPS[agent] if key in data})
     ids = [claim.id for claim in claims.claims]
     if len(ids) != len(set(ids)):
         raise ValueError("Claim IDs must be unique.")
