@@ -27,6 +27,17 @@ from tests.fakes import FakeCrustdata
 from tests.ledger_support import advance
 
 MODELS = ("fast-model", "mid-model")
+# Each agent receives only its own dossier groups. Use the orchestrator's scopes when they exist
+# (leo.context.DOSSIER_GROUPS); the fallback mirrors docs/resolution-context.md.
+try:
+    from leo.context import DOSSIER_GROUPS as SCOPES
+except ImportError:
+    SCOPES = {
+        "identity": ("basic_info", "locations", "people", "news"),
+        "scale_team": ("basic_info", "headcount", "employee_reviews"),
+        "funding": ("basic_info", "funding", "revenue", "headcount"),
+        "traction": ("basic_info", "hiring", "web_traffic", "followers"),
+    }
 POLICY = Policy(max_check_usd=100_000)
 
 
@@ -103,7 +114,7 @@ async def setup_run(ledger, dossier=COMPANY, claims=CLAIMS, stub=False, llms=Non
     claim_set = ClaimSet(company_name="Acme", claims=claims, is_stub=stub)
     await ledger.add_claims(run_id, claim_set)
     await advance(ledger, run_id, "RESOLVE")
-    slices = {a: json.dumps(dossier) for a in AGENTS}
+    slices = {a: json.dumps({k: dossier[k] for k in SCOPES[a] if k in dossier}) for a in AGENTS}
     packets = {p.agent: p for p in build_context_packets(claim_set, slices, POLICY)}
     await ledger.save_context_packets(run_id, tuple(packets.values()))
     llms = llms or {}
