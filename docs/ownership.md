@@ -28,5 +28,5 @@ Ledger additions are Ayush-owned: `scripts/init_ledger.py`, `scripts/ledger_demo
 Provider additions are Ayush-owned: `tests/test_provider_cache.py`,
 `tests/test_provider_settings.py`, `tests/test_provider_integration.py`,
 `tests/test_llm.py`, `scripts/provider_demo.py`, `scripts/provider_smoke.py`,
-`scripts/gemini_smoke.py`, `docs/providers.md`, `docs/providers-pr.md` and
-`docs/merge-sequence.md`. Shared dependency/CI changes remain coordinated by Ayush.
+`scripts/gemini_smoke.py`, `docs/providers.md` and `docs/providers-pr.md`.
+Shared dependency/CI changes remain coordinated by Ayush.

@@ -39,6 +39,6 @@ The current FakeLedger supports specialist stub writes only; do not mistake it
 for complete challenge/evidence test support. Extend support through Ayush as
 your feature tests require it. Default dependencies include Google GenAI and
 PyMuPDF. Live smoke checks passed for Crustdata and configured Gemini FAST;
-other model choices still need their own validation. See `docs/merge-sequence.md`.
+other model choices still need their own validation.
 
 The standalone offline harness is for smoke checks, not a submitted live pipeline.

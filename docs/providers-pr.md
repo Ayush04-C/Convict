@@ -14,7 +14,7 @@ placeholders until the later pipeline/API stages.
 - Cache TTLs, credential/parameter isolation, original retrieval dates and run evidence.
 - Gemini schema validation, one repair attempt and explicit configured model selection.
 - Default Google GenAI/PyMuPDF dependencies and full-suite CI with offline provider demo.
-- Opt-in live smoke scripts and provider/merge/handoff documentation.
+- Opt-in live smoke scripts and provider/handoff documentation.
 
 ## Validation
 
@@ -24,8 +24,6 @@ placeholders until the later pipeline/API stages.
 - Live Gemini FAST `gemini-3.1-flash-lite`: valid structured output, one request.
 - Live MID/PRO generation and complete agent orchestration were not tested.
 - CI runs the whole suite on pushes and PRs, with no provider keys or live requests.
-- Temporary combined tree with Daksh PRs #2/#3/#4/#5/#8: 659 tests passed,
-  Ruff and all offline demos passed; virtual merges were clean. No hosted merges performed.
 
 ## Provider test inventory
 
@@ -93,9 +91,7 @@ The provider group contains 91 cases, adding coverage to the previous
 - `test_live_lifespan_owns_and_closes_both_clients`
 - `test_partial_lifespan_failure_closes_already_created_client`
 
-## Review and integration
+## Scope
 
-No Daksh-owned source files or real credentials are included. Review
-`docs/providers.md` for manual smoke commands and `docs/merge-sequence.md` for
-stacked PR dependencies. Chat and submission work remain deferred. This branch
-does not create or merge a hosted PR automatically.
+No Daksh-owned source files or real credentials are included. See
+`docs/providers.md` for manual smoke commands. Chat and submission work remain deferred.

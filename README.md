@@ -42,8 +42,7 @@ Run `make provider-demo` for an offline provider/cache/ledger check. See
 [providers](docs/providers.md) for live smoke commands, configuration and limits.
 The default dependencies include Google GenAI and PyMuPDF so ingestion tests run
 in CI when Daksh's branches are merged. `requirements-features.txt` adds optional ADK.
-See [merge sequence](docs/merge-sequence.md) before merging stacked feature PRs.
 
 See [contracts](docs/contracts.md), [ownership](docs/ownership.md),
-[implementation stages](docs/ayush-stages.md), [handoff](docs/handoff.md), and
-[Git workflow](docs/git-workflow.md). Original blueprints are under `docs/reference/`.
+[implementation stages](docs/ayush-stages.md), and [handoff](docs/handoff.md).
+Original blueprints are under `docs/reference/`.
