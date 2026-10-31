@@ -3,9 +3,8 @@ import asyncio
 
 from agents.protocol import AgentContext
 from agents.registry import get_agents
-from app.schemas import Policy
+from app.schemas import DeckContent, Policy
 from ingest.claim_extractor import extract_claims
-from ingest.pdf_parser import parse_deck
 from leo.adjudicator import adjudicate
 from leo.context import build_context_packets
 from leo.scoring import compute
@@ -13,7 +12,9 @@ from tests.fakes import FakeCrustdata, FakeLedger, FakeLlm, FakeStore
 
 
 async def run_demo():
-    claims = await extract_claims(await parse_deck("stub-only.pdf"))
+    deck = DeckContent(path="stub-only.pdf", page_count=0, processed_pages=0,
+                       warnings=("STUB: offline harness, no PDF read",), is_stub=True)
+    claims = await extract_claims(deck)
     policy = Policy(max_check_usd=100000)
     packets = {p.agent: p for p in build_context_packets(claims, {}, policy)}
     store = FakeStore()
