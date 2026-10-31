@@ -40,6 +40,10 @@ class RunManager:
             def finished(done):
                 self._tasks.pop(run_id, None)
                 self._reserved -= 1
+                if not done.cancelled():
+                    error = done.exception()
+                    if error is not None:
+                        logger.error("Background job cleanup failed: %s", type(error).__name__)
 
             task.add_done_callback(finished)
 
