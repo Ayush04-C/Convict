@@ -1,4 +1,5 @@
 """Ayush-owned isolated auth fixtures; never load the developer's .env."""
+
 import secrets
 
 import httpx
@@ -22,16 +23,22 @@ def isolate_auth_environment(monkeypatch):
 @pytest.fixture(scope="session")
 def auth_settings(tmp_path_factory):
     return Settings(
-        _env_file=None, demo_user="test-user",
+        _env_file=None,
+        demo_user="test-user",
         demo_pass_hash=PasswordHash.recommended().hash(TEST_PASSWORD),
-        jwt_secret=secrets.token_urlsafe(48), mode="stub",
+        jwt_secret=secrets.token_urlsafe(48),
+        mode="stub",
         database_path=tmp_path_factory.mktemp("auth-api") / "ledger.sqlite",
+        upload_directory=tmp_path_factory.mktemp("auth-uploads"),
     )
 
 
 @pytest.fixture
 async def client(auth_settings):
-    async with httpx.AsyncClient(
-        transport=httpx.ASGITransport(app=create_app(auth_settings)), base_url="http://test",
-    ) as client:
-        yield client
+    app = create_app(auth_settings)
+    async with app.router.lifespan_context(app):
+        async with httpx.AsyncClient(
+            transport=httpx.ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            yield client

@@ -160,7 +160,7 @@ async def test_every_run_route_requires_authentication(client, auth_settings, pa
     assert_unauthorized(await getattr(client, method)(path))
     token = create_access_token("test-user", auth_settings)
     response = await getattr(client, method)(path, headers={"Authorization": "Bearer " + token})
-    assert response.status_code == 501
+    assert response.status_code == (422 if path == "/runs" else 404)
 
 
 async def test_openapi_exposes_bearer_auth_only_on_protected_routes(client):
