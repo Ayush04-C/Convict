@@ -2,12 +2,16 @@
 from pathlib import Path
 from typing import Literal
 
-from pydantic import SecretStr
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class AuthConfigurationError(ValueError):
     """Safe startup error: variable names and guidance, never secret values."""
+
+
+class ProviderConfigurationError(ValueError):
+    """Missing live-provider settings, without exposing their values."""
 
 
 class Settings(BaseSettings):
@@ -22,6 +26,11 @@ class Settings(BaseSettings):
     crustdata_api_key: SecretStr = SecretStr("")
     database_path: Path = Path("data/leo.sqlite")
     mode: Literal["stub", "live"] = "stub"
+    provider_request_timeout: float = Field(default=15, gt=0, le=60, allow_inf_nan=False)
+    provider_total_timeout: float = Field(default=45, gt=0, le=180, allow_inf_nan=False)
+    provider_max_retries: int = Field(default=3, ge=0, le=3)
+    gemini_timeout: float = Field(default=45, gt=0, le=180, allow_inf_nan=False)
+    ingest_inr_per_usd: float | None = Field(default=None, gt=0, allow_inf_nan=False)
 
     def require_auth_credentials(self) -> None:
         from argon2 import PasswordHasher
@@ -49,5 +58,16 @@ class Settings(BaseSettings):
                 + ". Run python -m scripts.configure_auth from the Leo directory."
             )
 
-    def require_live_credentials(self) -> None:
-        raise NotImplementedError("Stage 2/4: validate authentication and live provider configuration")
+    def require_live_credentials(self, provider: Literal["crustdata", "gemini"] | None = None) -> None:
+        missing = []
+        if provider not in (None, "crustdata", "gemini"):
+            raise ProviderConfigurationError("Unknown provider.")
+        if provider in (None, "crustdata") and not self.crustdata_api_key.get_secret_value().strip():
+            missing.append("CRUSTDATA_API_KEY")
+        if provider in (None, "gemini") and not self.gemini_api_key.get_secret_value().strip():
+            missing.append("GEMINI_API_KEY")
+        if provider is None:
+            missing.extend(name.upper() for name in ("model_fast", "model_mid", "model_pro")
+                           if not getattr(self, name).strip())
+        if missing:
+            raise ProviderConfigurationError("Configure " + ", ".join(missing) + " in .env before live calls.")
