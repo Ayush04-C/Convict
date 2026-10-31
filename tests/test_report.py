@@ -128,9 +128,52 @@ async def test_markdown_escapes_untrusted_text_and_controls(ledger, completed):
     rendered = render_markdown(report)
     assert "<script>" not in rendered and "\x1b" not in rendered
     assert "&lt;script&gt;" in rendered and "\\|" in rendered
-    assert "DO NOT INVEST" in rendered and "arr\\_ratio\\_over\\_3" in rendered
+    assert "DO NOT INVEST" in rendered and "more than three times" in rendered
 
 
 async def test_report_is_json_serializable(ledger, completed):
     report = await build_report(completed, ledger)
     assert json.loads(json.dumps(report, allow_nan=False)) == report
+
+
+async def test_readable_markdown_preserves_precision_and_links_sources(ledger, completed):
+    from copy import deepcopy
+
+    report = await build_report(completed, ledger)
+    before = deepcopy(report)
+    rendered = render_markdown(report)
+    narrative, audit = rendered.split("<details>", 1)
+    assert report == before
+    assert "fund's own rules" in rendered
+    assert "&#x27;" not in rendered and "&\\#x27;" not in rendered
+    assert "arr_ratio_over_3" not in narrative and "arr\\_ratio" not in narrative
+    assert "scale\\_team" not in narrative and "CONFIRMED" not in narrative
+    assert "$50,000,000" in narrative and "Not supplied by provider" in narrative
+    assert "Team and workplace" in narrative and "more than three times" in narrative
+    assert "funding:E" in audit
+    assert "0.858888888888" not in narrative
+    for item in report["evidence"]:
+        index = report["evidence"].index(item) + 1
+        assert f'<a id="source-{index}"></a>' in rendered
+    assert "[Source " in narrative and "](#source-" in narrative
+
+
+async def test_display_rounding_never_changes_saved_decision(ledger, completed):
+    report = await build_report(completed, ledger)
+    report["decision"]["total_score"] = 49.05151515151515
+    report["decision"]["confidence"] = 0.8588888888888888
+    rendered = render_markdown(report)
+    assert "| Overall score | 49.1 / 100 |" in rendered
+    assert "| Assessment confidence | 85.9% |" in rendered
+    assert report["decision"]["total_score"] == 49.05151515151515
+    assert report["decision"]["confidence"] == 0.8588888888888888
+
+
+async def test_prose_relabels_identifiers_without_rewriting_ordinary_words(ledger, completed):
+    report = await build_report(completed, ledger)
+    report["claims"][0]["findings"][0]["note"] = (
+        "No series_h round appears in Crustdata's funding history; see funding:E1."
+    )
+    rendered = render_markdown(report)
+    assert "No Series H round appears in Crustdata's funding history; see Source " in rendered
+    assert "Crustdata's Funding and financials history" not in rendered
