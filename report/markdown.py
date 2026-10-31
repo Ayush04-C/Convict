@@ -276,6 +276,8 @@ def render_markdown(report: dict) -> str:
         lines += ["**Company matching:** " + prose(report["resolution"]["reason"]), ""]
     if report["failure_code"]:
         lines += ["**Run failure:** " + text(label(report["failure_code"])), ""]
+        if report.get("failure_details"):
+            lines += ["**Extraction detail:** " + text(report["failure_details"]["message"]), ""]
     lines += [
         "<details>",
         "<summary>Technical audit references and execution status</summary>",
