@@ -11,6 +11,7 @@ import anyio
 from fastapi import APIRouter, Depends, File, Form, Header, Request, UploadFile, Response
 from sse_starlette.sse import EventSourceResponse
 from starlette.responses import JSONResponse
+from starlette.datastructures import Headers
 
 from app.auth import get_current_user
 from app.errors import ApiError
@@ -113,6 +114,33 @@ async def create_run(
     }
 
 
+@router.post("/{run_id}/retry", status_code=202)
+async def retry_run(run_id: str, request: Request, user: str = Depends(get_current_user)):
+    original = await owned(request, run_id, user)
+    if original["status"] != "failed":
+        raise ApiError(409, "RETRY_NOT_ALLOWED", "Only failed reviews can be retried.")
+    try:
+        source = open(original["deck_path"], "rb")
+    except OSError:
+        raise ApiError(
+            410, "DECK_UNAVAILABLE", "The saved PDF is unavailable. Upload it again."
+        ) from None
+    with source:
+        return await create_run(
+            request,
+            deck=UploadFile(
+                file=source,
+                filename="retry.pdf",
+                headers=Headers({"content-type": "application/pdf"}),
+            ),
+            company_name=original["company_name"],
+            domain=original["domain"],
+            max_check_usd=original["policy"].max_check_usd,
+            stage=original["policy"].stage,
+            user=user,
+        )
+
+
 @router.get("/{run_id}")
 async def get_run(run_id: str, request: Request, user: str = Depends(get_current_user)):
     repo = request.app.state.ledger
@@ -194,4 +222,3 @@ async def report(
             headers={"Cache-Control": "no-store"},
         )
     return JSONResponse(result, headers={"Cache-Control": "no-store"})
-
