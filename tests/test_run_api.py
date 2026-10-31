@@ -99,9 +99,7 @@ async def test_sse_replays_after_header_cursor_and_closes_on_terminal(auth_setti
         assert last.status_code == 200 and last.text == ""
 
 
-@pytest.mark.parametrize(
-    "suffix,method", [("", "get"), ("/events", "get"), ("/report", "get"), ("/chat", "post")]
-)
+@pytest.mark.parametrize("suffix,method", [("", "get"), ("/events", "get"), ("/report", "get")])
 async def test_other_owner_is_indistinguishable_from_missing_run(
     auth_settings, tmp_path, suffix, method
 ):
@@ -210,13 +208,12 @@ async def test_sse_invalid_cursor_is_safe(auth_settings, tmp_path, cursor):
         assert response.status_code == 422
 
 
-async def test_report_waits_for_terminal_state_and_chat_remains_deferred(auth_settings, tmp_path):
+async def test_report_waits_for_terminal_state(auth_settings, tmp_path):
     async with api(auth_settings, tmp_path) as (app, client):
         run = await app.state.ledger.create_run(
             auth_settings.demo_user, "Synthetic", None, Policy(max_check_usd=0), "not-used"
         )
         assert (await client.get(f"/runs/{run}/report")).status_code == 409
-        assert (await client.post(f"/runs/{run}/chat")).status_code == 501
         await app.state.ledger.fail_run(run, "TEST")
         report = await client.get(f"/runs/{run}/report")
         assert report.status_code == 200 and report.json()["decision"] is None
@@ -322,3 +319,8 @@ async def test_terminal_event_committed_between_queries_is_not_lost(ledger):
     ledger.get_run = race
     events = [event async for event in event_stream(ledger, run, 0, poll_interval=0.001)]
     assert events[-1]["event"] == "done"
+
+
+async def test_there_is_no_chat_route(auth_settings, tmp_path):
+    async with api(auth_settings, tmp_path) as (app, _):
+        assert not [path for path in app.openapi()["paths"] if "chat" in path]
