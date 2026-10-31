@@ -36,6 +36,7 @@ class GeminiClient:
             ).aio
         )
         self._closed = False
+        self.request_count = 0
 
     async def __aenter__(self):
         return self
@@ -64,6 +65,7 @@ class GeminiClient:
             async with asyncio.timeout(self.timeout):
                 for attempt in range(2):
                     try:
+                        self.request_count += 1
                         response = await self._client.models.generate_content(
                             model=model,
                             contents=contents,
