@@ -40,3 +40,7 @@ Pipeline/API additions are Ayush-owned: `app/jobs.py`, `app/runs.py`, `app/uploa
 `app/document_llm.py`, `leo/runtime.py`, `leo/gates.py`, `tests/pipeline_support.py`,
 `tests/test_gate_confirmation.py`, `tests/test_run_api.py`, `tests/test_jobs.py`, `tests/test_api_demo.py`,
 `scripts/api_demo.py` and `docs/pipeline-api.md`.
+
+Reporting/CLI additions are Ayush-owned: `report/markdown.py`, `scripts/leo_cli.py`,
+`tests/test_report.py` and `tests/test_cli.py`. The report builder is read-only;
+report/API/CLI changes do not modify scoring or Daksh-owned components.
