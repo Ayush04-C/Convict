@@ -109,6 +109,37 @@ async def test_known_conflicting_founding_year_blocks_automatic_acceptance():
     ).status == "cannot_assess"
 
 
+async def test_a_supplied_domain_that_resolves_to_one_company_outranks_a_conflicting_deck_year():
+    c = client(response(match(score=1, year=2017)))
+    result = await resolve_company(
+        "Synthetic", "example.com", claims(("identity_founding", 2012)), c
+    )
+    assert (result.status, result.company_id) == ("resolved", 1)
+    c.identify.assert_awaited_once_with(domains=["example.com"])
+
+
+async def test_a_supplied_domain_does_not_rescue_a_low_confidence_match():
+    c = client(response(match(score=0.6, year=2017)))
+    result = await resolve_company(
+        "Synthetic", "example.com", claims(("identity_founding", 2012)), c
+    )
+    assert result.status == "cannot_assess"
+
+
+async def test_a_supplied_domain_does_not_pick_between_two_equal_candidates():
+    c = client(response(match(ident=1, score=1, year=2017), match(ident=2, score=1, year=2018)))
+    result = await resolve_company(
+        "Synthetic", "example.com", claims(("identity_founding", 2012)), c
+    )
+    assert result.status == "cannot_assess"
+
+
+async def test_a_name_only_lookup_still_refuses_a_conflicting_year():
+    c = client(response(match(score=1, year=2017)))
+    result = await resolve_company("Synthetic", None, claims(("identity_founding", 2012)), c)
+    assert result.status == "cannot_assess"
+
+
 async def test_duplicate_ids_and_order_do_not_change_resolution():
     a, b = match(score=0.6), match(2, 0.6, "other.com", 2010, "USA")
     deck = claims(("identity_founding", 2020), ("identity_hq", "India"))

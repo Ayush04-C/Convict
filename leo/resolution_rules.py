@@ -180,8 +180,15 @@ def choose(items, claims, domain, *, high_only=False):
     if top_score >= 0.9 and len(top) == 1:
         c, _ = top[0]
         basic = object_group(c.data, "basic_info")
+        # When the investor supplied the exact domain and it belongs to this one company, that is
+        # the company. A deck whose year disagrees with the data is a claim to report as
+        # contradicted, not a reason to refuse the assessment: otherwise lying about the founding
+        # year would let a company escape scrutiny. The year check only separates lookalikes when
+        # the lookup had nothing but a name.
+        domain_pinned = bool(domain and domain in c.domains)
         if (
-            "year" not in attributes
+            domain_pinned
+            or "year" not in attributes
             or basic.get("year_founded") is None
             or str(basic["year_founded"]) == str(attributes["year"])
         ):
