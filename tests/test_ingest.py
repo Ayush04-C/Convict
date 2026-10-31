@@ -136,7 +136,8 @@ async def test_missing_configuration_is_reported_not_guessed(pdf, monkeypatch):
         model_mid = ""
 
     monkeypatch.setattr(claim_extractor, "_load_settings", lambda: Unconfigured())
-    with pytest.raises(ExtractionError, match="not configured"):
+    monkeypatch.setattr(claim_extractor, "_bharatcode_config", lambda: None)
+    with pytest.raises(ExtractionError, match="No model provider is configured"):
         await extract_claims(pdf)
 
 
