@@ -857,8 +857,31 @@ class LedgerRepository:
         )
 
     async def save_decision(
-        self, run_id: str, decision: Decision, adjudication: AdjudicationResult
+        self,
+        run_id: str,
+        decision: Decision,
+        adjudication: AdjudicationResult,
+        *,
+        scoring_breakdown: dict | None = None,
     ) -> None:
+        if scoring_breakdown is not None:
+            scoring_breakdown = json.loads(encode(scoring_breakdown))
+            expected = decision.model_dump(
+                mode="json",
+                include={
+                    "total_score",
+                    "credibility",
+                    "confidence",
+                    "verdict",
+                    "check_size_usd",
+                    "gates",
+                },
+            )
+            if (
+                not isinstance(scoring_breakdown, dict)
+                or scoring_breakdown.get("result") != expected
+            ):
+                raise LedgerReferenceError("Scoring breakdown does not match the decision.")
         async with self._write(run_id) as db:
             run = await run_record(db, run_id)
             if run["phase"] != "SCORING":
@@ -909,6 +932,7 @@ class LedgerRepository:
                         {
                             "decision": decision.model_dump(),
                             "adjudication": adjudication.model_dump(),
+                            "scoring": scoring_breakdown,
                         }
                     ),
                     stub,
@@ -928,3 +952,9 @@ class LedgerRepository:
         if not result:
             raise LedgerNotFound("Adjudication is not available yet.")
         return AdjudicationResult.model_validate(json.loads(result[0][0])["adjudication"])
+
+    async def get_scoring_breakdown(self, run_id: str) -> dict | None:
+        result = await self._read(run_id, "SELECT breakdown_json FROM decisions WHERE run_id=?")
+        if not result:
+            raise LedgerNotFound("Scoring breakdown is not available yet.")
+        return json.loads(result[0][0]).get("scoring")
