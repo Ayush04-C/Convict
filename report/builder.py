@@ -5,6 +5,7 @@ import json
 from ledger.repo import LedgerRepository
 from ledger.repo import TERMINAL
 from leo.context import AGENTS
+from report.presentation import FIELD_LABELS, label, source_summary, truncated_matches
 
 LABELS = {
     "PASS": "DO NOT INVEST",
@@ -82,10 +83,12 @@ async def build_report(run_id: str, repo: LedgerRepository) -> dict:
     references = []
     for item in evidence:
         value = json.loads(item.value_json)
+        original = field(data, item.field_path)
+        matches_excerpt = truncated_matches(value, original)
         matching_dossier = bool(
             dossier
             and item.source == dossier.source
-            and (item.evidence_id == dossier.evidence_id or field(data, item.field_path) == value)
+            and (item.evidence_id == dossier.evidence_id or original == value or matches_excerpt)
         )
         references.append(
             {
@@ -93,7 +96,16 @@ async def build_report(run_id: str, repo: LedgerRepository) -> dict:
                 "agent": item.agent,
                 "source": item.source,
                 "field_path": item.field_path,
+                "display_label": FIELD_LABELS.get(item.field_path, label(item.field_path)),
                 "value": None if item is dossier else value,
+                "display_summary": "Full company-data snapshot retained in the ledger."
+                if item is dossier
+                else (
+                    "Saved company snapshot (specialist evidence contains only an excerpt): "
+                    + source_summary(original, item.field_path)
+                    if matching_dossier and matches_excerpt
+                    else source_summary(value, item.field_path)
+                ),
                 "recorded_fetched_at": item.fetched_at,
                 "provider_fetched_at": dossier.fetched_at if matching_dossier else None,
                 "source_updated_at": dossier.source_updated_at

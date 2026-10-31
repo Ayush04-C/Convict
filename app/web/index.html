@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Leo · Pitch deck review</title><link rel="stylesheet" href="/ui/style.css">
+  <script src="/ui/app.js" defer></script>
+</head>
+<body>
+  <header><a class="brand" href="/">leo<span> / pitch deck review</span></a><div><span id="mode" class="badge">Connecting…</span> <button id="signout" class="quiet" hidden>Sign out</button></div></header>
+  <main>
+    <section class="intro"><p class="eyebrow">FROM PITCH TO PERSPECTIVE</p><h1>A clearer look at<br>the company behind the deck.</h1><p>Upload a pitch deck. Leo checks its claims against company data and brings the findings into one report.</p></section>
+    <p id="error" class="error" role="alert" hidden></p>
+    <section id="login-panel" class="panel narrow"><h2>Sign in to your workspace</h2><p>Use the demo account configured for this Leo server.</p>
+      <form id="login"><label>Username<input id="username" name="username" autocomplete="username" required maxlength="100" value="ayush"></label><label>Password<input id="password" name="password" type="password" autocomplete="current-password" required maxlength="1024"></label><button type="submit">Sign in <span aria-hidden="true">→</span></button></form>
+    </section>
+    <section id="workspace" hidden>
+      <section class="panel" id="upload-panel"><div class="section-title"><div><p class="eyebrow">NEW REVIEW</p><h2>Start with a pitch deck</h2></div><span class="muted">PDF · up to 20 MB</span></div>
+        <form id="upload"><fieldset id="upload-fields"><label class="dropzone">Your pitch deck<input id="deck" name="deck" type="file" accept=".pdf,application/pdf" required><span>Choose a PDF from your computer.</span></label>
+        <div class="fields"><label>Company name<input name="company_name" required maxlength="500" placeholder="Acme"></label><label>Company website domain <span class="muted">optional</span><input name="domain" placeholder="acme.com"><small>This is the company's website, not its office location.</small></label><label>Maximum investment · USD<input name="max_check_usd" type="number" min="0" step="any" value="100000" required><small>Your fund's upper investment limit.</small></label><label>Company stage<input name="stage" maxlength="100" value="growth" required><small>For example: seed, early, or growth.</small></label></div>
+        <button id="review-button" type="submit">Review this deck <span aria-hidden="true">→</span></button></fieldset></form>
+      </section>
+      <section class="panel progress-panel" id="progress-panel" hidden aria-live="polite"><div class="section-title"><h2 id="phase">Preparing your review</h2><span id="spinner" class="spinner" aria-hidden="true"></span></div><p id="progress-note">The review can take several minutes. Progress below comes from the server.</p><p id="run-label" class="muted"></p><ul id="agents" class="agent-list"></ul></section>
+      <section class="panel resume-panel"><form id="resume"><label>Open or reconnect to an existing review<input id="run-id" placeholder="Run ID" required></label><button type="submit" class="secondary" id="resume-button">Open report</button></form></section>
+      <section id="result" class="panel" hidden aria-live="polite"><div class="section-title"><h2>Your report</h2><div class="downloads"><button id="download-md" class="secondary">Download Markdown</button><button id="download-json" class="secondary">Download JSON</button></div></div><div id="report-content"></div></section>
+    </section>
+    <footer>Evidence-led review. Revenue estimates are not audited financial statements. The result follows your fund's configured policy.</footer>
+  </main>
+</body>
+</html>
