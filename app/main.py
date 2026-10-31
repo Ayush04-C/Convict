@@ -1,4 +1,5 @@
 """Authenticated API foundation; analysis routes remain explicit placeholders."""
+
 from contextlib import AsyncExitStack, asynccontextmanager
 from uuid import uuid4
 
@@ -33,9 +34,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 app.state.llm = await resources.enter_async_context(GeminiClient(settings))
             yield
 
-    app = FastAPI(title="Leo API", version="0.2.0",
-                  description="JWT authentication and SQLite storage are implemented. Analysis routes remain stubs.",
-                  lifespan=lifespan)
+    app = FastAPI(
+        title="Leo API",
+        version="0.2.0",
+        description="JWT authentication and SQLite storage are implemented. Analysis routes remain stubs.",
+        lifespan=lifespan,
+    )
     app.state.settings = settings
     install_handlers(app)
     app.include_router(auth_router)
@@ -57,8 +61,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def planned_route(user: str = Depends(get_current_user)):
         raise HTTPException(501, "Stage 7: run API is not implemented")
 
-    for path, method in [("/runs", "POST"), ("/runs/{run_id}", "GET"),
-                         ("/runs/{run_id}/events", "GET"), ("/runs/{run_id}/report", "GET"),
-                         ("/runs/{run_id}/chat", "POST")]:
+    for path, method in [
+        ("/runs", "POST"),
+        ("/runs/{run_id}", "GET"),
+        ("/runs/{run_id}/events", "GET"),
+        ("/runs/{run_id}/report", "GET"),
+        ("/runs/{run_id}/chat", "POST"),
+    ]:
         app.add_api_route(path, planned_route, methods=[method])
     return app
