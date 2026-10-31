@@ -32,6 +32,15 @@ class Settings(BaseSettings):
     provider_max_retries: int = Field(default=3, ge=0, le=3)
     gemini_timeout: float = Field(default=45, gt=0, le=180, allow_inf_nan=False)
     ingest_inr_per_usd: float | None = Field(default=None, gt=0, allow_inf_nan=False)
+    upload_directory: Path = Path("data/uploads")
+    max_pending_runs: int = Field(default=10, ge=1, le=100)
+    max_active_runs: int = Field(default=1, ge=1, le=4)
+    ingest_timeout: float = Field(default=180, gt=0, le=300, allow_inf_nan=False)
+    phase_timeout: float = Field(default=60, gt=0, le=60, allow_inf_nan=False)
+    pipeline_timeout: float = Field(default=480, gt=0, le=900, allow_inf_nan=False)
+    bharatcode_api_key: SecretStr = SecretStr("")
+    bharatcode_model: str = "qwen-3.8-27b"
+    bharatcode_base_url: str = "https://bharatcode.ai/api/model/v1"
 
     def require_auth_credentials(self) -> None:
         from argon2 import PasswordHasher
