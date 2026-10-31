@@ -28,6 +28,7 @@ from app.schemas import (
     Phase,
     Policy,
     Reply,
+    Resolution,
     RunStatus,
     Verdict,
 )
@@ -356,6 +357,31 @@ class LedgerRepository:
                 for r in result
             ),
         )
+
+    async def save_resolution(self, run_id: str, resolution: Resolution) -> None:
+        resolution = Resolution.model_validate(resolution.model_dump())
+        validate_json(resolution.candidates_json)
+        async with self._write(run_id) as db:
+            run = await run_record(db, run_id)
+            if run["phase"] != "RESOLVE":
+                raise LedgerStateError("Company identity can only be saved during resolution.")
+            if await one(
+                db, "SELECT 1 FROM events WHERE run_id=? AND kind='resolution_saved'", (run_id,)
+            ):
+                raise LedgerConflict("Company resolution is already saved.")
+            await db.execute(
+                "UPDATE runs SET crustdata_company_id=? WHERE run_id=?",
+                (resolution.company_id, run_id),
+            )
+            await event(db, run_id, "resolution_saved", resolution.model_dump())
+            if resolution.status == "cannot_assess":
+                await db.execute(
+                    "UPDATE runs SET phase='CANNOT_ASSESS',status='cannot_assess' WHERE run_id=?",
+                    (run_id,),
+                )
+                await event(
+                    db, run_id, "done", {"phase": "CANNOT_ASSESS", "status": "cannot_assess"}
+                )
 
     async def save_context_packets(self, run_id: str, packets: tuple[ContextPacket, ...]) -> None:
         async with self._write(run_id) as db:
