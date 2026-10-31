@@ -9,6 +9,7 @@ from app.main import create_app
 from app.settings import Settings
 
 TEST_PASSWORD = "test-only-password-42"
+pytest_plugins = ["tests.ledger_support"]
 
 
 @pytest.fixture(autouse=True)
@@ -19,11 +20,12 @@ def isolate_auth_environment(monkeypatch):
 
 
 @pytest.fixture(scope="session")
-def auth_settings():
+def auth_settings(tmp_path_factory):
     return Settings(
         _env_file=None, demo_user="test-user",
         demo_pass_hash=PasswordHash.recommended().hash(TEST_PASSWORD),
         jwt_secret=secrets.token_urlsafe(48), mode="stub",
+        database_path=tmp_path_factory.mktemp("auth-api") / "ledger.sqlite",
     )
 
 
