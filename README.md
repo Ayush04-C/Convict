@@ -2,8 +2,9 @@
 
 Local pitch-deck diligence API, built by Ayush and Daksh.
 
-The foundation includes demo-account JWT authentication, the health endpoint,
-schemas, fixture-backed specialists, an offline demo, and deterministic scoring.
+The foundation includes demo-account JWT authentication, a persistent SQLite ledger,
+restricted agent ledger access, the health endpoint, schemas, fixture-backed
+specialists, offline demos, and deterministic scoring.
 Live extraction, provider access, persistent orchestration, upload, SSE, report API
 and chat still require implementation. Run endpoints reject unauthenticated calls
 with 401 and return 501 after valid authentication until their implementation stage.
@@ -30,6 +31,11 @@ See [authentication](docs/authentication.md) for manual testing and expected res
 `make demo` runs offline, needs no server or API key, and prints **stub** results.
 No provider credit is spent by tests or demo.
 Tests inject isolated credentials and do not require your `.env`.
+
+API startup initializes `DATABASE_PATH` (default `data/leo.sqlite`). Use
+`make ledger-init` to initialize it explicitly, or `make ledger-demo` for a separate
+persistent stub demonstration. See [ledger](docs/ledger.md) for inspection commands,
+phase rules and the handoff interface. No provider API key is needed for this stage.
 
 Daksh also installs `pip install -r requirements-features.txt` for the live SDKs.
 SDK/model compatibility is a build-time check, not verified by the skeleton.

@@ -29,9 +29,11 @@ when normalization is implemented; do not silently assume a rate.
 
 ## What is unfinished
 
-The real LedgerRepository, scoped writer/tool enforcement, live providers,
-authentication and persistent orchestration are declared but not implemented.
-Their methods intentionally raise NotImplementedError. API stubs return 501.
+LedgerRepository, bound LedgerWriter and authentication are implemented. Read
+`docs/ledger.md` for phase/ownership rules and the additive `get_evidence` helper.
+Scoped provider tools, the timeout runner, live providers and persistent
+orchestration remain unfinished. Their methods intentionally raise
+NotImplementedError. API run stubs return 501 after successful authentication.
 The current FakeLedger supports specialist stub writes only; do not mistake it
 for complete challenge/evidence test support. Extend support through Ayush as
 your feature tests require it. Live SDK dependencies/model names are unverified.
