@@ -362,3 +362,15 @@ async def test_a_hung_gemini_call_is_cut_off_by_the_hard_cap():
     adapter._hard_cap_s = 0.05
     with pytest.raises(ProviderUnavailableError, match="in time"):
         await adapter.extract([], "p", RawClaimSet, "m")
+
+
+@pytest.mark.parametrize("error, message", [
+    ("ReadTimeout", "in time"), ("ConnectTimeout", "in time"), ("ConnectError", "network"),
+    ("RemoteProtocolError", "network"),
+])
+async def test_http_transport_errors_are_classified_as_provider_unavailable(error, message):
+    httpx = pytest.importorskip("httpx")
+    from ingest.claim_extractor import ProviderUnavailableError, RawClaimSet
+    adapter = adapter_failing_with(getattr(httpx, error)("boom"))
+    with pytest.raises(ProviderUnavailableError, match=message):
+        await adapter.extract([], "p", RawClaimSet, "m")
