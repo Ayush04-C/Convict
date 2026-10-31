@@ -108,9 +108,16 @@ async def _execute(run_id, repo, settings, deps):
             return
     await repo.set_phase(run_id, "ADJUDICATE", STATUS["ADJUDICATE"])
     async with asyncio.timeout(settings.phase_timeout):
-        adjudication = await deps.adjudicate(run_id)
+        adjudication = await deps.adjudicate(
+            run_id, repo=repo, llm=deps.llm, model=settings.model_pro or None
+        )
+    # The lead analyst writes its own rulings to the ledger and reports every one of them. Apply
+    # only the revisions not already stored, so that neither a ruling it persisted nor a retried
+    # call can collide with the ledger's unique revision ids.
+    stored = {r.revision_id for r in await repo.get_revisions(run_id)}
     for revision in adjudication.revisions:
-        await repo.add_revision(run_id, revision)
+        if revision.revision_id not in stored:
+            await repo.add_revision(run_id, revision)
     await repo.set_phase(run_id, "SCORING", STATUS["SCORING"])
     findings = tuple(f for f in await repo.get_all_findings(run_id) if f.agent in survivors)
     verdicts = tuple(v for v in await repo.get_verdicts(run_id) if v.agent in survivors)
