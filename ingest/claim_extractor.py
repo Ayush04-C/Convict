@@ -82,14 +82,77 @@ def _load_settings():
     return Settings()
 
 
-def _default_extractor() -> tuple[DocumentExtractor, str]:
-    settings = _load_settings()
-    key = settings.gemini_api_key.get_secret_value()
-    if not key or not settings.model_mid:
-        raise ExtractionError("Gemini is not configured (set GEMINI_API_KEY and MODEL_MID).")
-    from ingest.gemini_document import GeminiDocumentExtractor
+class FallbackExtractor:
+    """Tries `primary`; only an outage (ProviderUnavailableError) moves on to `secondary`.
 
-    return GeminiDocumentExtractor(key), settings.model_mid
+    Key, plan or model problems on the primary are NOT masked by the fallback, so a broken
+    configuration stays visible. Each backend uses its own model name; `secondary` ignores
+    the model passed in.
+    """
+
+    def __init__(self, primary: DocumentExtractor, secondary: DocumentExtractor):
+        self.primary, self.secondary = primary, secondary
+
+    async def extract(self, parts: Sequence[tuple[str, bytes]], prompt: str,
+                      schema: type[BaseModel], model: str) -> str:
+        try:
+            return await self.primary.extract(parts, prompt, schema, model)
+        except ProviderUnavailableError:
+            try:
+                return await self.secondary.extract(parts, prompt, schema, "")
+            except ProviderUnavailableError:
+                raise ProviderUnavailableError(
+                    "Both Gemini and BharatCode are unavailable; try again shortly.") from None
+            except ExtractionError as exc:
+                raise ExtractionError(f"Gemini was unavailable and the fallback failed: {exc}") from None
+
+
+def _bharatcode_config() -> dict | None:
+    """BharatCode settings from the environment or .env; None when no key is set.
+
+    Read here (not from app.settings, which Ayush owns). Never logged or put in errors.
+    """
+    import os
+
+    from dotenv import dotenv_values
+
+    from ingest.bharatcode_document import DEFAULT_BASE_URL, DEFAULT_MODEL
+
+    file = dotenv_values(Path(__file__).resolve().parents[1] / ".env")
+
+    def pick(name: str, default: str = "") -> str:
+        return (os.environ.get(name) or file.get(name) or default).strip()
+
+    key = pick("BHARATCODE_API_KEY")
+    if not key:
+        return None
+    return {"api_key": key, "model": pick("BHARATCODE_MODEL", DEFAULT_MODEL),
+            "base_url": pick("BHARATCODE_BASE_URL", DEFAULT_BASE_URL)}
+
+
+def _default_extractor() -> tuple[DocumentExtractor, str]:
+    """Gemini first; BharatCode as the outage fallback, or alone when Gemini is not configured."""
+    settings = _load_settings()
+    backends: list[DocumentExtractor] = []
+    key = settings.gemini_api_key.get_secret_value()
+    if key and settings.model_mid:
+        try:
+            from ingest.gemini_document import GeminiDocumentExtractor
+
+            backends.append(GeminiDocumentExtractor(key))
+        except ImportError:
+            raise ExtractionError("google-genai is not installed; run pip install -r "
+                                  "requirements-features.txt.") from None
+    bharat = _bharatcode_config()
+    if bharat:
+        from ingest.bharatcode_document import BharatCodeExtractor
+
+        backends.append(BharatCodeExtractor(**bharat))
+    if not backends:
+        raise ExtractionError("No model provider is configured (set GEMINI_API_KEY and MODEL_MID, "
+                              "or BHARATCODE_API_KEY).")
+    extractor = backends[0] if len(backends) == 1 else FallbackExtractor(backends[0], backends[1])
+    return extractor, settings.model_mid or (bharat["model"] if bharat else "")
 
 
 def _stub_claims() -> ClaimSet:
