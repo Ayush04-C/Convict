@@ -6,7 +6,7 @@
 3. Run `make test`, `make lint`, `make demo` before changing code.
 4. Read `app/schemas.py`, `agents/protocol.py`, `tests/fakes.py`, and `docs/contracts.md`.
 5. Read low-level reference sections 5, 8 and 9.
-6. Create `feat/daksh-claim-extraction`; edit only your paths in `docs/ownership.md`.
+6. Use a descriptive feature branch; edit only your paths in `docs/ownership.md`.
 
 ## Stable replacement points
 
@@ -32,9 +32,12 @@ when normalization is implemented; do not silently assume a rate.
 LedgerRepository, bound LedgerWriter and authentication are implemented. Read
 `docs/ledger.md` for phase/ownership rules and the additive `get_evidence` helper.
 Crustdata and shared Gemini clients are implemented; see `docs/providers.md` for
-native response shapes, cache provenance and usage. Scoped provider tools, the timeout runner and persistent
-orchestration remain unfinished. Their methods intentionally raise
-NotImplementedError. API run stubs return 501 after successful authentication.
+native response shapes, cache provenance and usage. Resolution/context and sandbox
+execution are implemented; read `docs/resolution-context.md` and `docs/sandbox.md`.
+Specialists receive per-phase `LedgerPort`/`ToolPort` capabilities; keep using those
+protocols rather than assuming the concrete writer class or retaining capabilities
+between phases. Persistent orchestration remains unfinished. API run stubs return
+501 after successful authentication.
 The current FakeLedger supports specialist stub writes only; do not mistake it
 for complete challenge/evidence test support. Extend support through Ayush as
 your feature tests require it. Default dependencies include Google GenAI and

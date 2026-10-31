@@ -6,6 +6,7 @@ The foundation includes demo-account JWT authentication, a persistent SQLite led
 restricted agent ledger access, the health endpoint, schemas, fixture-backed
 specialists, offline demos, and deterministic scoring.
 Provider clients, response caching and structured Gemini output are implemented.
+Company resolution, isolated context packets and sandbox phase execution are implemented.
 Live extraction, persistent orchestration, upload, SSE, report API
 and chat still require implementation. Run endpoints reject unauthenticated calls
 with 401 and return 501 after valid authentication until their implementation stage.
@@ -42,6 +43,12 @@ Run `make provider-demo` for an offline provider/cache/ledger check. See
 [providers](docs/providers.md) for live smoke commands, configuration and limits.
 The default dependencies include Google GenAI and PyMuPDF so ingestion tests run
 in CI when Daksh's branches are merged. `requirements-features.txt` adds optional ADK.
+
+Run `make context-demo` for the offline resolution/context/sandbox handoff, or
+`python -m scripts.context_demo --timeout-agent` to verify one failed agent and
+three surviving workers. See [resolution/context](docs/resolution-context.md) and
+[sandbox](docs/sandbox.md) for contracts, limits and tests. These demos use stub
+specialists; the production pipeline and run APIs are still unfinished.
 
 See [contracts](docs/contracts.md), [ownership](docs/ownership.md),
 [implementation stages](docs/ayush-stages.md), and [handoff](docs/handoff.md).

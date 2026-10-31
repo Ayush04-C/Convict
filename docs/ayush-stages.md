@@ -1,6 +1,7 @@
 # Ayush implementation stages
 
-The foundation, authentication, ledger and provider stages are implemented. Live analysis
+Foundation, authentication, ledger, providers, resolution/context and sandbox
+execution are implemented. Persistent pipeline coordination and live analysis
 remains unfinished. Existing checks are real; test starter docstrings do not count
 as implemented tests. See `authentication.md` for setup and manual verification.
 
@@ -10,8 +11,9 @@ as implemented tests. See `authentication.md` for setup and manual verification.
 | Authentication | Demo password hash verification, JWT, configuration checks, safe errors | Valid login; missing/expired/wrong-signature tokens rejected |
 | Ledger | Implement LedgerRepository, transactions, events and bounded phase waits | All entity reads/writes, same-run references, rollback, timeout and ownership |
 | Providers (implemented) | Crustdata client/cache/dossier, Gemini adapter and typed errors | Mocked failures, cached repeat call, live smoke checks; no live CI |
-| Resolution/context | Identity gate, lookalikes, web fallback and dossier slices | Clear/tied/empty candidates, immutable private packets |
-| Sandbox/pipeline | Phase barriers, scoped writers/tools, limits, persistent run | Stub run saves decision; one failed agent does not hang others |
+| Resolution/context (implemented) | Identity gate, lookalikes, bounded web fallback and dossier slices | Clear/tied/empty candidates, frozen packets and ledger persistence |
+| Sandbox (implemented) | Scoped writers/tools, call limits and phase execution | Timeout/cancellation, duplicate execution and capability revocation tests |
+| Pipeline (next) | Phase controller, barriers, live agent wiring and persistent run | Run saves a decision; failures are reflected honestly |
 | API | Upload, status, event stream/replay, report, owner checks | Authenticated client completes a run; other owners cannot access it |
 | Scoring/report | Integrate confirmed gates and effective findings; report evidence dates | All policy boundaries and evidence references; no unverifiable data presented as fact |
 | Chat/demo (deferred) | Grounded chat; minimal UI only if time permits | Evidence-only answers, repeatable honest/inflated/fake-company demo |
