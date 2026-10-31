@@ -20,6 +20,7 @@ from ingest.bharatcode_document import BharatCodeExtractor
 from leo.runtime import PipelineDependencies, synthetic_dependencies
 from app.uploads import UploadGuard
 from agents.registry import get_agents
+from app.web import router as web_router
 
 
 def create_app(
@@ -88,6 +89,7 @@ def create_app(
     install_handlers(app)
     app.include_router(auth_router)
     app.include_router(runs_router)
+    app.include_router(web_router)
 
     @app.middleware("http")
     async def request_id(request: Request, call_next):
