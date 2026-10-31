@@ -1,11 +1,15 @@
 """File-backed SQLite connections, safe transactions and versioned initialization."""
+
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 import aiosqlite
 
 from ledger.errors import (
-    LedgerBusy, LedgerConflict, LedgerReferenceError, LedgerStorageError,
+    LedgerBusy,
+    LedgerConflict,
+    LedgerReferenceError,
+    LedgerStorageError,
 )
 
 SCHEMA_VERSION = 1
@@ -16,8 +20,9 @@ async def connection(path: str | Path, *, create: bool = False, timeout: float =
     path = Path(path).resolve()
     try:
         target = str(path) if create else path.as_uri() + "?mode=rw"
-        async with aiosqlite.connect(target, uri=not create, timeout=timeout,
-                                     isolation_level=None) as db:
+        async with aiosqlite.connect(
+            target, uri=not create, timeout=timeout, isolation_level=None
+        ) as db:
             db.row_factory = aiosqlite.Row
             await db.execute("PRAGMA foreign_keys = ON")
             await db.execute("PRAGMA recursive_triggers = ON")
@@ -25,11 +30,17 @@ async def connection(path: str | Path, *, create: bool = False, timeout: float =
     except aiosqlite.IntegrityError as error:
         if "FOREIGN KEY" in str(error):
             raise LedgerReferenceError("Referenced record does not exist in this run.") from None
-        raise LedgerConflict("Duplicate or immutable record, or invalid database constraint.") from None
+        raise LedgerConflict(
+            "Duplicate or immutable record, or invalid database constraint."
+        ) from None
     except aiosqlite.OperationalError as error:
         if "locked" in str(error) or "busy" in str(error):
-            raise LedgerBusy("Database is busy; retry the operation after the writer finishes.") from None
-        raise LedgerStorageError("Cannot access ledger; initialize it and check file permissions.") from None
+            raise LedgerBusy(
+                "Database is busy; retry the operation after the writer finishes."
+            ) from None
+        raise LedgerStorageError(
+            "Cannot access ledger; initialize it and check file permissions."
+        ) from None
     except aiosqlite.DatabaseError:
         raise LedgerStorageError("Ledger database operation failed.") from None
 
@@ -50,7 +61,9 @@ async def initialize(path: str | Path) -> None:
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
     except OSError:
-        raise LedgerStorageError("Cannot create ledger directory; check file permissions.") from None
+        raise LedgerStorageError(
+            "Cannot create ledger directory; check file permissions."
+        ) from None
     async with connection(path, create=True) as db:
         version = (await db.execute_fetchall("PRAGMA user_version"))[0][0]
         if version > SCHEMA_VERSION:
@@ -59,8 +72,11 @@ async def initialize(path: str | Path) -> None:
         schema = Path(__file__).with_name("models.sql").read_text()
         try:
             # Version 0 is the supplied skeleton; v1 adds metadata and indexes.
-            await db.executescript("BEGIN IMMEDIATE;\n" + schema
-                                   + f"\nPRAGMA user_version = {SCHEMA_VERSION};\nCOMMIT;")
+            await db.executescript(
+                "BEGIN IMMEDIATE;\n"
+                + schema
+                + f"\nPRAGMA user_version = {SCHEMA_VERSION};\nCOMMIT;"
+            )
         except BaseException:
             await db.rollback()
             raise

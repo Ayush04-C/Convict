@@ -28,6 +28,9 @@ class FakeLedger:
     async def add_evidence(self, evidence):
         raise NotImplementedError("Extend fake when feature tests require evidence writes")
 
+    async def get_evidence(self):
+        return ()  # Initial neutral specialists produce no evidence.
+
     async def add_metrics(self, metrics):
         raise NotImplementedError("Extend fake when feature tests require metrics")
 

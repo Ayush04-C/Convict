@@ -1,8 +1,16 @@
 """Bound specialist capability; ownership and phase checks happen transactionally."""
+
 from dataclasses import dataclass, field, InitVar
 
 from app.schemas import (
-    AgentName, Challenge, Evidence, Finding, FindingRevision, Metric, Reply, Verdict,
+    AgentName,
+    Challenge,
+    Evidence,
+    Finding,
+    FindingRevision,
+    Metric,
+    Reply,
+    Verdict,
 )
 from ledger.errors import LedgerPermissionError
 from ledger.repo import AGENTS, LedgerRepository
@@ -46,3 +54,6 @@ class LedgerWriter:
 
     async def get_all_findings(self) -> tuple[Finding, ...]:
         return await self._repo.get_all_findings(self.run_id, actor=self.agent)
+
+    async def get_evidence(self) -> tuple[Evidence, ...]:
+        return await self._repo.get_evidence(self.run_id, actor=self.agent)
