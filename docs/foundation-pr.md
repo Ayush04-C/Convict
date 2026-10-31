@@ -17,8 +17,9 @@ remain explicitly unimplemented. This PR is the starting point for parallel work
 
 ## Verification
 
-Run `make lint`, `make test`, and `make demo` before publishing; record the actual
-final results in the hosted PR. Hosted CI has not run until the branch is pushed.
+Local verification: 36 tests passed; Ruff passed; the offline demo completed with
+six placeholder findings, four stub verdicts and zero check sizing. Python modules
+compile successfully. Hosted CI has not run; no remote is configured yet.
 
 ## Limits
 
