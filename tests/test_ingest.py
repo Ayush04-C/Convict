@@ -280,3 +280,85 @@ async def test_gemini_adapter_rejects_an_empty_reply():
     adapter._client = SimpleNamespace(aio=SimpleNamespace(models=Models()))
     with pytest.raises(RuntimeError, match="no text"):
         await adapter.extract([], "p", RawClaimSet, "m")
+
+
+# ---- provider failures fail fast (found by the first live run) --------------------------
+
+async def test_provider_outage_fails_fast_without_the_image_fallback(pdf, monkeypatch):
+    from ingest.claim_extractor import ProviderUnavailableError
+
+    rendered = []
+    monkeypatch.setattr(claim_extractor, "_render_pages", lambda deck: rendered.append(1) or ([], ""))
+    fake = FakeExtractor(ProviderUnavailableError("Gemini is unavailable or busy (503)"))
+    with pytest.raises(ExtractionError, match="unavailable or busy"):
+        await extract_claims(pdf, extractor=fake, model="m")
+    assert rendered == [] and len(fake.calls) == 1  # no second attempt on the same overloaded model
+
+
+async def test_config_errors_are_reported_directly_without_fallback(pdf, monkeypatch):
+    rendered = []
+    monkeypatch.setattr(claim_extractor, "_render_pages", lambda deck: rendered.append(1) or ([], ""))
+    fake = FakeExtractor(ExtractionError("Gemini rejected the request (404); check MODEL_MID."))
+    with pytest.raises(ExtractionError, match="MODEL_MID"):
+        await extract_claims(pdf, extractor=fake, model="m")
+    assert rendered == []
+
+
+def adapter_failing_with(error):
+    from types import SimpleNamespace
+
+    from ingest.gemini_document import GeminiDocumentExtractor
+
+    class Models:
+        async def generate_content(self, **kwargs):
+            if callable(error):
+                return await error()
+            raise error
+
+    adapter = GeminiDocumentExtractor.__new__(GeminiDocumentExtractor)
+    adapter._client = SimpleNamespace(aio=SimpleNamespace(models=Models()))
+    return adapter
+
+
+@pytest.mark.parametrize("code", [429, 500, 503, 504])
+async def test_gemini_overload_and_rate_limits_become_provider_unavailable(code):
+    errors = pytest.importorskip("google.genai.errors")
+    from ingest.claim_extractor import ProviderUnavailableError
+    error_class = errors.ClientError if code == 429 else errors.ServerError
+    adapter = adapter_failing_with(error_class(code, {"error": {"message": "high demand"}}))
+    from ingest.claim_extractor import RawClaimSet
+    with pytest.raises(ProviderUnavailableError, match=str(code)):
+        await adapter.extract([], "p", RawClaimSet, "m")
+
+
+@pytest.mark.parametrize("code", [401, 403, 404])
+async def test_gemini_key_and_model_errors_name_the_settings_to_check(code):
+    errors = pytest.importorskip("google.genai.errors")
+    from ingest.claim_extractor import ProviderUnavailableError, RawClaimSet
+    adapter = adapter_failing_with(errors.ClientError(code, {"error": {"message": "nope"}}))
+    with pytest.raises(ExtractionError, match="MODEL_MID") as raised:
+        await adapter.extract([], "p", RawClaimSet, "m")
+    assert not isinstance(raised.value, ProviderUnavailableError)
+
+
+async def test_gemini_input_rejection_is_left_for_the_image_fallback():
+    errors = pytest.importorskip("google.genai.errors")
+    from ingest.claim_extractor import RawClaimSet
+    adapter = adapter_failing_with(errors.ClientError(400, {"error": {"message": "unsupported"}}))
+    with pytest.raises(errors.ClientError):
+        await adapter.extract([], "p", RawClaimSet, "m")
+
+
+async def test_a_hung_gemini_call_is_cut_off_by_the_hard_cap():
+    import asyncio
+
+    pytest.importorskip("google.genai")
+    from ingest.claim_extractor import ProviderUnavailableError, RawClaimSet
+
+    async def hang():
+        await asyncio.sleep(30)
+
+    adapter = adapter_failing_with(hang)
+    adapter._hard_cap_s = 0.05
+    with pytest.raises(ProviderUnavailableError, match="in time"):
+        await adapter.extract([], "p", RawClaimSet, "m")
