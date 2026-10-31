@@ -30,3 +30,8 @@ Provider additions are Ayush-owned: `tests/test_provider_cache.py`,
 `tests/test_llm.py`, `scripts/provider_demo.py`, `scripts/provider_smoke.py`,
 `scripts/gemini_smoke.py`, `docs/providers.md` and `docs/providers-pr.md`.
 Shared dependency/CI changes remain coordinated by Ayush.
+
+Resolution/context and sandbox additions are Ayush-owned: `leo/resolution_rules.py`,
+`sandbox/scoped_ledger.py`, `tests/test_resolution_integration.py`,
+`tests/test_scoped_tools.py`, `tests/test_context_demo.py`, `scripts/context_demo.py`,
+`docs/resolution-context.md` and `docs/sandbox.md`.
