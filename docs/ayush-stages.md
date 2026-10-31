@@ -1,7 +1,8 @@
 # Ayush implementation stages
 
-The current branch establishes the starter repository only. Existing scoring and
-contract checks are real; test starter docstrings do not count as implemented tests.
+The foundation, authentication and ledger stages are implemented. Live analysis
+remains unfinished. Existing checks are real; test starter docstrings do not count
+as implemented tests. See `authentication.md` for setup and manual verification.
 
 | Stage | Scope | Gate |
 |---|---|---|

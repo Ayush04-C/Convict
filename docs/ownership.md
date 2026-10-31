@@ -15,3 +15,12 @@ Ayush creates all starting files. Then each person edits only their own paths.
 Shared parent folders do not mean shared file ownership. Request a change from its
 owner instead of editing their file. Daksh adds new fixtures with distinct names.
 Real Retool/Zepto responses are not included until captured; synthetic data is labeled.
+
+Authentication additions are Ayush-owned: `scripts/configure_auth.py`,
+`tests/conftest.py`, `tests/test_auth.py`, `tests/test_auth_settings.py`,
+`tests/test_auth_setup.py`, and `docs/authentication.md`.
+
+Ledger additions are Ayush-owned: `scripts/init_ledger.py`, `scripts/ledger_demo.py`,
+`tests/ledger_support.py`, `tests/test_ledger_repository.py`,
+`tests/test_ledger_phases.py`, `tests/test_ledger_writer.py`,
+`tests/test_ledger_integration.py`, `docs/ledger.md` and `docs/ledger-pr.md`.

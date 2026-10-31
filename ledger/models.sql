@@ -11,6 +11,10 @@ CREATE TABLE IF NOT EXISTS claims (
   value TEXT, unit TEXT, period TEXT, as_of TEXT, slide INTEGER, testable INTEGER,
   PRIMARY KEY (run_id, claim_id)
 );
+CREATE TABLE IF NOT EXISTS claim_sets (
+  run_id TEXT PRIMARY KEY REFERENCES runs(run_id), company_name TEXT,
+  is_stub INTEGER NOT NULL DEFAULT 0
+);
 CREATE TABLE IF NOT EXISTS evidence (
   run_id TEXT REFERENCES runs(run_id), evidence_id TEXT, agent TEXT, source TEXT,
   field_path TEXT, value_json TEXT, fetched_at TEXT, crustdata_updated_at TEXT,
@@ -74,6 +78,10 @@ CREATE TABLE IF NOT EXISTS events (
   payload_json TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS events_run_cursor ON events(run_id, event_id);
+CREATE INDEX IF NOT EXISTS revisions_finding_order
+ON finding_revisions(run_id, finding_id, revision_seq);
+CREATE INDEX IF NOT EXISTS findings_agent ON findings(run_id, agent);
+CREATE UNIQUE INDEX IF NOT EXISTS replies_one_per_challenge ON replies(run_id, challenge_id);
 CREATE TABLE IF NOT EXISTS api_cache (
   cache_key TEXT PRIMARY KEY, endpoint TEXT, response_json TEXT,
   fetched_at TEXT, ttl_seconds INTEGER
@@ -86,6 +94,15 @@ SELECT f.*, COALESCE((
   ORDER BY r.revision_seq DESC LIMIT 1
 ), f.severity) AS severity_final
 FROM findings f;
+
+CREATE TRIGGER IF NOT EXISTS claim_sets_no_update
+BEFORE UPDATE ON claim_sets BEGIN
+  SELECT RAISE(ABORT, 'append-only record');
+END;
+CREATE TRIGGER IF NOT EXISTS claim_sets_no_delete
+BEFORE DELETE ON claim_sets BEGIN
+  SELECT RAISE(ABORT, 'append-only record');
+END;
 
 -- Preserve history; only coordinator state and cache are mutable.
 CREATE TRIGGER IF NOT EXISTS claims_no_update

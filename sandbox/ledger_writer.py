@@ -1,35 +1,59 @@
-"""Ayush: implement authorization and phase checks before using with live agents."""
-from app.schemas import AgentName
-from ledger.repo import LedgerRepository
+"""Bound specialist capability; ownership and phase checks happen transactionally."""
+
+from dataclasses import dataclass, field, InitVar
+
+from app.schemas import (
+    AgentName,
+    Challenge,
+    Evidence,
+    Finding,
+    FindingRevision,
+    Metric,
+    Reply,
+    Verdict,
+)
+from ledger.errors import LedgerPermissionError
+from ledger.repo import AGENTS, LedgerRepository
 
 
+@dataclass(frozen=True)
 class LedgerWriter:
-    def __init__(self, run_id: str, agent: AgentName, repo: LedgerRepository):
-        self.run_id, self.agent, self._repo = run_id, agent, repo
+    run_id: str
+    agent: AgentName
+    repo: InitVar[LedgerRepository]
+    _repo: LedgerRepository = field(init=False, repr=False)
 
-    async def add_findings(self, findings):
-        raise NotImplementedError("Stage 6: bind writer, validate evidence and ownership")
+    def __post_init__(self, repo):
+        if self.agent not in AGENTS:
+            raise LedgerPermissionError("Unknown specialist namespace.")
+        object.__setattr__(self, "_repo", repo)
 
-    async def add_evidence(self, evidence):
-        raise NotImplementedError("Stage 6: same-run append-only evidence")
+    async def add_findings(self, findings: tuple[Finding, ...]) -> None:
+        await self._repo.add_findings(self.run_id, findings, actor=self.agent)
 
-    async def add_metrics(self, metrics):
-        raise NotImplementedError("Stage 6: append-only metrics")
+    async def add_evidence(self, evidence: tuple[Evidence, ...]) -> None:
+        await self._repo.add_evidence(self.run_id, evidence, actor=self.agent)
 
-    async def add_challenges(self, challenges):
-        raise NotImplementedError("Stage 6: validate phase, evidence, targets and max two")
+    async def add_metrics(self, metrics: tuple[Metric, ...]) -> None:
+        await self._repo.add_metrics(self.run_id, metrics, actor=self.agent)
 
-    async def get_challenges_for(self):
-        raise NotImplementedError("Stage 6: own challenges only, after barrier")
+    async def add_challenges(self, challenges: tuple[Challenge, ...]) -> None:
+        await self._repo.add_challenges(self.run_id, challenges, actor=self.agent)
 
-    async def add_reply(self, reply):
-        raise NotImplementedError("Stage 6: append own reply")
+    async def get_challenges_for(self) -> tuple[Challenge, ...]:
+        return await self._repo.get_challenges_for(self.run_id, self.agent, actor=self.agent)
 
-    async def add_revision(self, revision):
-        raise NotImplementedError("Stage 6: own finding revisions only")
+    async def add_reply(self, reply: Reply) -> None:
+        await self._repo.add_reply(self.run_id, reply, actor=self.agent)
 
-    async def add_verdict(self, verdict):
-        raise NotImplementedError("Stage 6: own verdict")
+    async def add_revision(self, revision: FindingRevision) -> None:
+        await self._repo.add_revision(self.run_id, revision, actor=self.agent)
 
-    async def get_all_findings(self):
-        raise NotImplementedError("Stage 6: deny cross-agent reads before barrier")
+    async def add_verdict(self, verdict: Verdict) -> None:
+        await self._repo.add_verdict(self.run_id, verdict, actor=self.agent)
+
+    async def get_all_findings(self) -> tuple[Finding, ...]:
+        return await self._repo.get_all_findings(self.run_id, actor=self.agent)
+
+    async def get_evidence(self) -> tuple[Evidence, ...]:
+        return await self._repo.get_evidence(self.run_id, actor=self.agent)
