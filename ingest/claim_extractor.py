@@ -49,6 +49,11 @@ class ExtractionError(RuntimeError):
     """Extraction failed after validation retry and fallback; message is safe to show."""
 
 
+class ProviderUnavailableError(ExtractionError):
+    """Gemini is overloaded, rate limited or timed out. Retrying images on the same model
+    would only wait again, so this skips the image fallback and fails fast."""
+
+
 class RawClaim(BaseModel):
     """Extraction-only shape: loose types keep Gemini's structured output reliable."""
     topic: Topic
