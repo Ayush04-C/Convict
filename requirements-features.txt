@@ -1,5 +1,4 @@
 -r requirements.txt
-# Verify the live SDK/model combination before enabling providers.
+# Only the specialist-agent framework remains optional; ingestion dependencies
+# are installed by requirements.txt so their tests run in CI.
 google-adk
-google-genai
-pymupdf

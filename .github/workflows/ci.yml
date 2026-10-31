@@ -13,3 +13,6 @@ jobs:
       - run: python -m pytest
       - run: python -m scripts.demo
       - run: python -m scripts.ledger_demo --temporary
+      - run: python -m scripts.provider_demo
+      - run: python -m scripts.context_demo
+      - run: python -m scripts.context_demo --timeout-agent

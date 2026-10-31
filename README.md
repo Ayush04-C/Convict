@@ -5,7 +5,9 @@ Local pitch-deck diligence API, built by Ayush and Daksh.
 The foundation includes demo-account JWT authentication, a persistent SQLite ledger,
 restricted agent ledger access, the health endpoint, schemas, fixture-backed
 specialists, offline demos, and deterministic scoring.
-Live extraction, provider access, persistent orchestration, upload, SSE, report API
+Provider clients, response caching and structured Gemini output are implemented.
+Company resolution, isolated context packets and sandbox phase execution are implemented.
+Live extraction, persistent orchestration, upload, SSE, report API
 and chat still require implementation. Run endpoints reject unauthenticated calls
 with 401 and return 501 after valid authentication until their implementation stage.
 
@@ -37,9 +39,17 @@ API startup initializes `DATABASE_PATH` (default `data/leo.sqlite`). Use
 persistent stub demonstration. See [ledger](docs/ledger.md) for inspection commands,
 phase rules and the handoff interface. No provider API key is needed for this stage.
 
-Daksh also installs `pip install -r requirements-features.txt` for the live SDKs.
-SDK/model compatibility is a build-time check, not verified by the skeleton.
+Run `make provider-demo` for an offline provider/cache/ledger check. See
+[providers](docs/providers.md) for live smoke commands, configuration and limits.
+The default dependencies include Google GenAI and PyMuPDF so ingestion tests run
+in CI when Daksh's branches are merged. `requirements-features.txt` adds optional ADK.
+
+Run `make context-demo` for the offline resolution/context/sandbox handoff, or
+`python -m scripts.context_demo --timeout-agent` to verify one failed agent and
+three surviving workers. See [resolution/context](docs/resolution-context.md) and
+[sandbox](docs/sandbox.md) for contracts, limits and tests. These demos use stub
+specialists; the production pipeline and run APIs are still unfinished.
 
 See [contracts](docs/contracts.md), [ownership](docs/ownership.md),
-[implementation stages](docs/ayush-stages.md), [handoff](docs/handoff.md), and
-[Git workflow](docs/git-workflow.md). Original blueprints are under `docs/reference/`.
+[implementation stages](docs/ayush-stages.md), and [handoff](docs/handoff.md).
+Original blueprints are under `docs/reference/`.
