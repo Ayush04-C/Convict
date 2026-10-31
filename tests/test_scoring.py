@@ -75,3 +75,31 @@ def test_unknown_claim_reference_rejected():
     claims, findings, verdicts, policy = case()
     with pytest.raises(ValueError, match="unknown claim"):
         compute(claims, (findings[0].model_copy(update={"claim_id": "C2"}),), verdicts, policy)
+
+
+@pytest.mark.parametrize("target,tier", [(49.99,"PASS"), (50,"DIG_DEEPER"),
+                                        (64.99,"DIG_DEEPER"), (65,"INVEST_WITH_CONDITIONS"),
+                                        (79.99,"INVEST_WITH_CONDITIONS"), (80,"INVEST")])
+def test_exact_and_fractional_tier_boundaries(target, tier):
+    # Full credibility contributes 35 points; dimensions contribute the other 65.
+    result = compute(*case(agent_score=(target - 35) / 0.65), has_profit_documents=True)
+    assert result.total_score == pytest.approx(target)
+    assert result.verdict == tier
+
+
+def test_empty_claim_set_does_not_divide_by_zero():
+    result = compute(ClaimSet(), (), (), Policy(max_check_usd=0))
+    assert result.confidence == 0
+    assert result.verdict == "DIG_DEEPER"
+    assert result.check_size_usd == 0
+
+
+def test_missing_data_does_not_override_confirmed_gate():
+    result = compute(*case(status="UNVERIFIABLE"), confirmed_gates=("entity_unresolved",))
+    assert result.verdict == "PASS"
+
+
+def test_effective_revision_changes_severity_cap():
+    claims, findings, verdicts, policy = case(severity=5)
+    revised = findings[0].model_copy(update={"severity_final": 2})
+    assert compute(claims, (revised,), verdicts, policy, has_profit_documents=True).verdict == "INVEST"
