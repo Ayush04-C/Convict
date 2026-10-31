@@ -3,6 +3,8 @@
 from dataclasses import dataclass
 import re
 
+from rapidfuzz.fuzz import ratio
+
 from app.schemas import ClaimSet
 from crustdata.cache import json_text
 from crustdata.client import CrustdataError, company_id, normalize_domain
@@ -22,6 +24,29 @@ def domain_or_none(value):
         return normalize_domain(value).removeprefix("www.")
     except (ValueError, TypeError):
         return None
+
+
+def name_matches(name, candidate):
+    def clean(value):
+        return " ".join(
+            word
+            for word in normalized(value).split()
+            if word
+            not in {
+                "inc",
+                "incorporated",
+                "ltd",
+                "limited",
+                "private",
+                "pvt",
+                "llc",
+                "corp",
+                "corporation",
+            }
+        )
+
+    actual = object_group(candidate.data, "basic_info").get("name")
+    return isinstance(actual, str) and bool(clean(name)) and ratio(clean(name), clean(actual)) >= 90
 
 
 @dataclass(frozen=True)

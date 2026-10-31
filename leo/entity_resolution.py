@@ -7,7 +7,7 @@ from urllib.parse import urlsplit
 from app.schemas import ClaimSet, Resolution
 from crustdata.cache import json_text
 from crustdata.client import CrustdataError, normalize_domain
-from leo.resolution_rules import candidates, choose, domain_or_none
+from leo.resolution_rules import candidates, choose, domain_or_none, name_matches
 
 SEARCH_DOMAIN_LIMIT = 3
 
@@ -48,7 +48,10 @@ async def resolve_company(
                 url = result.get("url")
                 if not isinstance(url, str):
                     continue
-                parsed = urlsplit(url)
+                try:
+                    parsed = urlsplit(url)
+                except ValueError:
+                    continue
                 if parsed.scheme not in ("http", "https") or parsed.username or parsed.password:
                     continue
                 found = domain_or_none(parsed.hostname)
@@ -58,7 +61,9 @@ async def resolve_company(
                     break
             if domains:
                 fallback = candidates(await client.identify(domains=domains))
-                fallback = tuple(c for c in fallback if c.domains.intersection(domains))
+                fallback = tuple(
+                    c for c in fallback if c.domains.intersection(domains) and name_matches(name, c)
+                )
                 selected, extra = choose(fallback, claims, domain, high_only=True)
                 summary.extend(extra)
                 if selected:

@@ -221,3 +221,16 @@ async def test_provider_errors_propagate_and_deadline_is_typed():
 def test_resolution_identity_invariant(status, ident):
     with pytest.raises(ValidationError):
         Resolution(status=status, company_id=ident, reason="test")
+
+
+@pytest.mark.parametrize("ident", [True, "1", 1.5, -1])
+def test_resolution_requires_a_strict_positive_integer_id(ident):
+    with pytest.raises(ValidationError):
+        Resolution(status="resolved", company_id=ident, reason="test")
+
+
+async def test_web_discards_malformed_urls_and_unrelated_company_names():
+    wrong = match()
+    wrong["company_data"]["basic_info"]["name"] = "Unrelated business"
+    c = client(response(), response(wrong), urls=("https://[broken", "https://example.com"))
+    assert (await resolve_company("Synthetic", None, claims(), c)).status == "cannot_assess"

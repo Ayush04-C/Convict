@@ -195,7 +195,7 @@ class AdjudicationResult(FrozenModel):
 
 class Resolution(FrozenModel):
     status: Literal["resolved", "cannot_assess"]
-    company_id: int | None = None
+    company_id: int | None = Field(default=None, strict=True, gt=0)
     reason: str
     candidates_json: str = "[]"
 
