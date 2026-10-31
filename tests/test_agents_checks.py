@@ -145,7 +145,7 @@ async def finding_of(ledger, run_id, agent, claim_id=None, check_note=None):
 
 def test_evidence_json_keeps_small_values_and_labels_truncated_ones():
     assert json.loads(_evidence_json({"a": 1})) == {"a": 1}
-    big = _evidence_json({"rows": ["x" * 200] * 50})
+    big = _evidence_json({"rows": ["x" * 1000] * 200})
     parsed = json.loads(big)
     assert parsed["_truncated"] is True and parsed["_chars"] > MAX_EVIDENCE_CHARS
     assert len(parsed["preview"]) == MAX_EVIDENCE_CHARS
@@ -494,3 +494,15 @@ async def test_full_debate_feeds_the_real_scoring(ledger):
     gates = [m.name for m in await ledger.get_metrics(run_id) if m.name.startswith("gate:")]
     assert gates == ["gate:arr_ratio_over_3"]       # proposed, never applied by the agents
     assert decision.gates == ()                     # confirming a gate is the orchestrator's decision
+
+
+async def test_a_realistically_large_value_is_stored_whole_so_it_matches_the_dossier_exactly(ledger):
+    milestones = [{"round_type": "series_c",
+                   "investors_detailed": [{"name": f"Investor {i}", "note": "x" * 80} for i in range(120)]}]
+    assert len(json.dumps(milestones)) > 10_000          # the size of a real company's funding history
+    dossier = {**COMPANY, "funding": {**COMPANY["funding"], "milestones": milestones}}
+    run_id, contexts, _ = await setup_run(ledger, dossier=dossier)
+    await advance(ledger, run_id, "ROUND1")
+    await FundingAgent(models=MODELS).run_round1(contexts["funding"])
+    stored = next(e for e in await ledger.get_evidence(run_id) if e.field_path == "funding.milestones")
+    assert json.loads(stored.value_json) == milestones    # exact: a truncated copy could never be confirmed
