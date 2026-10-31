@@ -59,13 +59,3 @@ Ledger-backed run ownership, persistent orchestration, live extraction/providers
 and functional run/report/chat endpoints belong to subsequent stages. No Daksh
 feature files are changed. Local secret files and the unrelated working-copy edit
 to `docs/foundation-pr.md` are excluded from this PR.
-
-## Merge sequence
-
-1. Push `feat/ayush-authentication` and open this PR against `main`.
-2. Confirm GitHub Actions is green and review the changed-file list.
-3. Merge this stage; use a merge commit to preserve the focused commit history.
-4. Start the ledger stage from updated `main` on a separate branch.
-
-The ledger implementation is not a prerequisite for merging this completed
-authentication stage.
