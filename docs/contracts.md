@@ -69,7 +69,8 @@ are UNVERIFIABLE. Revenue estimates are estimates, not audited ARR confirmation.
   DIG_DEEPER with zero sizing unless a confirmed gate requires PASS.
 - Failed/missing agent verdicts contribute zero to their fixed score weights and
   zero to the four-agent confidence average; do not redistribute their weights.
-- Clamp score inputs to their schema ranges. Reject duplicate agent verdicts.
+- Reject nonfinite or out-of-range score inputs through schema validation. Reject
+  duplicate agent verdicts.
 - Scores >=80 with a severity-5 finding are capped at INVEST_WITH_CONDITIONS.
 - Tiers use real thresholds >=80, >=65, >=50, else PASS (including decimals).
 - Hard gates require explicit evidence of failure. Missing founder/funding/status

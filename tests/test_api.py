@@ -1,14 +1,15 @@
-from fastapi.testclient import TestClient
+import httpx
 
 from app.main import create_app
 
 
-def test_health_and_explicit_unimplemented_api():
-    with TestClient(create_app()) as client:
-        assert client.get("/health").json()["live_analysis"] is False
+async def test_health_and_explicit_unimplemented_api():
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=create_app()),
+                                 base_url="http://test") as client:
+        assert (await client.get("/health")).json()["live_analysis"] is False
         for path, method in [("/auth/login","post"), ("/runs","post"), ("/runs/test","get")]:
-            response = getattr(client, method)(path)
+            response = await getattr(client, method)(path)
             assert response.status_code == 501
             assert response.json()["error"]["request_id"] == response.headers["X-Request-ID"]
-        assert client.get("/docs").status_code == 200
-        assert client.get("/missing").status_code == 404
+        assert (await client.get("/docs")).status_code == 200
+        assert (await client.get("/missing")).status_code == 404
