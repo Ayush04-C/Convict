@@ -143,6 +143,11 @@ $('signup').addEventListener('submit',async event=>{
   try{enter(await request('/auth/signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:$('signup-username').value,password:$('signup-password').value})}));}
   catch(e){if(e.name!=='AbortError')error(e.message);}finally{button.disabled=false;}
 });
+$('demo-login').addEventListener('click',async event=>{
+  error('');const button=event.currentTarget;button.disabled=true;
+  try{enter(await request('/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:'maya',password:'maya-yc-demo-2026'})}));}
+  catch(e){if(e.name!=='AbortError')error('The demo account is not available on this server. Sign in or create an account.');}finally{button.disabled=false;}
+});
 $('signout').addEventListener('click',signOut);
 $('retry-review').addEventListener('click',()=>review(async()=>{const original=activeRun;$('result').hidden=true;$('phase').textContent='Starting a new review of the saved PDF';$('spinner').hidden=false;try{const result=await request('/runs/'+encodeURIComponent(original)+'/retry',{method:'POST'});await monitor(result.run_id);}catch(e){if(savedReport)$('result').hidden=false;throw e;}}));
 $('upload').addEventListener('submit',event=>{event.preventDefault();const form=new FormData(event.target);review(async()=>{const file=form.get('deck');if(!file.size||file.size>20*1024*1024||!file.name.toLowerCase().endsWith('.pdf'))throw new Error('Choose a nonempty PDF no larger than 20 MB.');$('progress-panel').hidden=false;$('phase').textContent='Uploading your pitch deck';$('spinner').hidden=false;$('run-label').textContent='';$('agents').replaceChildren();$('result').hidden=true;const response=await request('/runs',{method:'POST',body:form});await monitor(response.run_id);});});

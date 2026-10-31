@@ -80,3 +80,11 @@ def test_page_offers_signup():
     html = Path("app/web/index.html").read_text()
     js = Path("app/web/app.js").read_text()
     assert 'id="signup"' in html and "/auth/signup" in js
+
+
+def test_demo_button_uses_the_documented_credentials():
+    from pathlib import Path
+    from scripts.configure_auth import DEMO_PASSWORD, DEMO_USERNAME
+    js = Path("app/web/app.js").read_text()
+    assert 'id="demo-login"' in Path("app/web/index.html").read_text()
+    assert f"username:'{DEMO_USERNAME}',password:'{DEMO_PASSWORD}'" in js
