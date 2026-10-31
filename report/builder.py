@@ -5,7 +5,7 @@ import json
 from ledger.repo import LedgerRepository
 from ledger.repo import TERMINAL
 from leo.context import AGENTS
-from report.presentation import source_summary, truncated_matches
+from report.presentation import FIELD_LABELS, label, source_summary, truncated_matches
 
 LABELS = {
     "PASS": "DO NOT INVEST",
@@ -96,6 +96,7 @@ async def build_report(run_id: str, repo: LedgerRepository) -> dict:
                 "agent": item.agent,
                 "source": item.source,
                 "field_path": item.field_path,
+                "display_label": FIELD_LABELS.get(item.field_path, label(item.field_path)),
                 "value": None if item is dossier else value,
                 "display_summary": "Full company-data snapshot retained in the ledger."
                 if item is dossier

@@ -55,6 +55,7 @@ async def test_findings_and_source_dates_are_grounded(ledger, completed):
     )
     assert source["value"] == 50_000_000 and source["provider_fetched_at"] == "2026-10-31T00:00:00Z"
     assert source["recorded_fetched_at"]
+    assert source["display_label"] == "Upper revenue estimate"
     assert next(e for e in report["evidence"] if e["is_full_dossier_reference"])["value"] is None
 
 

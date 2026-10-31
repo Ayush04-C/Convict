@@ -130,6 +130,8 @@ def source_summary(value, path):
     if isinstance(value, dict) and value.get("_truncated"):
         return "Only a shortened excerpt was recorded; details are not reconstructed from incomplete JSON."
     if isinstance(value, (int, float)) and not isinstance(value, bool):
+        if path == "basic_info.year_founded":
+            return str(value)
         if path.endswith("_usd"):
             return money(value)
         if "_percent" in path or path.endswith("_pct"):

@@ -69,6 +69,7 @@ def test_plain_source_summaries_keep_units_and_zero_values():
     from report.presentation import source_summary
 
     assert source_summary(0, "funding.total_investment_usd") == "$0"
+    assert source_summary(2020, "basic_info.year_founded") == "2020"
     assert source_summary(-0.9, "hiring.openings_growth_percent.qoq") == "-0.9%"
     assert source_summary({"yoy": -10.412}, "headcount.growth_percent") == "Year over year: -10.4%"
     assert source_summary([], "funding.milestones") == "No records supplied"
