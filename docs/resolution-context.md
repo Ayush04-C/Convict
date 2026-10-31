@@ -39,7 +39,9 @@ order. `product_other` is shared background with `testable=False`. Dossier group
 | Traction | basic_info, hiring, web_traffic, followers |
 
 Provider group names/nulls are preserved. Each slice is independent finite JSON;
-unknown groups, malformed JSON and duplicate claim IDs are rejected. Stub status
+unknown agent names, malformed JSON and duplicate claim IDs are rejected. Explicit
+legacy slices containing a full dossier are filtered to the same allowed groups.
+Stub status
 from either claims or dossier propagates. Full evidence timestamps remain in the
 ledger; packets do not fabricate new retrieval dates. Existing explicit slice
 callers remain supported. Saved packets are append-only.
@@ -53,4 +55,4 @@ python -m pytest tests/test_entity_resolution.py tests/test_context.py tests/tes
 ```
 
 The demo uses synthetic responses and stub specialists, and deliberately stops at
-ROUND1. Production orchestration and the upload/run API are subsequent work.
+ROUND1. See `pipeline-api.md` and `make api-demo` for the full persistent HTTP flow.

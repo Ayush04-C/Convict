@@ -35,3 +35,8 @@ Resolution/context and sandbox additions are Ayush-owned: `leo/resolution_rules.
 `sandbox/scoped_ledger.py`, `tests/test_resolution_integration.py`,
 `tests/test_scoped_tools.py`, `tests/test_context_demo.py`, `scripts/context_demo.py`,
 `docs/resolution-context.md` and `docs/sandbox.md`.
+
+Pipeline/API additions are Ayush-owned: `app/jobs.py`, `app/runs.py`, `app/uploads.py`,
+`app/document_llm.py`, `leo/runtime.py`, `leo/gates.py`, `tests/pipeline_support.py`,
+`tests/test_gate_confirmation.py`, `tests/test_run_api.py`, `tests/test_jobs.py`, `tests/test_api_demo.py`,
+`scripts/api_demo.py` and `docs/pipeline-api.md`.

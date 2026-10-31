@@ -38,6 +38,11 @@ def test_full_configuration_requires_keys_and_models():
         ("gemini_timeout", -1),
         ("ingest_inr_per_usd", 0),
         ("ingest_inr_per_usd", float("nan")),
+        ("max_active_runs", 0),
+        ("max_pending_runs", 101),
+        ("phase_timeout", 61),
+        ("ingest_timeout", 0),
+        ("pipeline_timeout", float("inf")),
     ],
 )
 def test_invalid_provider_limits_are_rejected(field, value):

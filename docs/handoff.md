@@ -36,8 +36,10 @@ native response shapes, cache provenance and usage. Resolution/context and sandb
 execution are implemented; read `docs/resolution-context.md` and `docs/sandbox.md`.
 Specialists receive per-phase `LedgerPort`/`ToolPort` capabilities; keep using those
 protocols rather than assuming the concrete writer class or retaining capabilities
-between phases. Persistent orchestration remains unfinished. API run stubs return
-501 after successful authentication.
+between phases. Persistent orchestration, upload, status and SSE are implemented;
+see `docs/pipeline-api.md`. The coordinator confirms gate proposals from original
+dossier facts and same-run citations before scoring. Real lead adjudication and
+report integration remain unfinished; these are visible limitations.
 The current FakeLedger supports specialist stub writes only; do not mistake it
 for complete challenge/evidence test support. Extend support through Ayush as
 your feature tests require it. Default dependencies include Google GenAI and

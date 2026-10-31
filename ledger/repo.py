@@ -188,6 +188,36 @@ class LedgerRepository:
             run["policy"] = Policy.model_validate_json(run.pop("policy_json"))
             return run
 
+    async def claim_run(self, run_id: str) -> None:
+        async with self._write(run_id) as db:
+            run = await run_record(db, run_id)
+            if run["phase"] != "QUEUED":
+                raise LedgerConflict("Run execution is already claimed.")
+            await db.execute(
+                "UPDATE runs SET phase='INGEST',status='parsing' WHERE run_id=?", (run_id,)
+            )
+            await event(db, run_id, "phase_changed", {"phase": "INGEST", "status": "parsing"})
+
+    async def fail_run(self, run_id: str, code: str) -> None:
+        # Callers supply fixed internal codes, never raw exception messages.
+        async with connection(self.path, timeout=self.timeout) as db, transaction(db):
+            run = await run_record(db, run_id)
+            if run["phase"] in TERMINAL:
+                return
+            await db.execute(
+                "UPDATE runs SET phase='FAILED',status='failed' WHERE run_id=?", (run_id,)
+            )
+            await event(db, run_id, "run_failed", {"code": code})
+            await event(db, run_id, "done", {"phase": "FAILED", "status": "failed"})
+
+    async def recover_interrupted_runs(self) -> None:
+        async with connection(self.path, timeout=self.timeout) as db:
+            pending = await rows(
+                db, "SELECT run_id FROM runs WHERE phase NOT IN ('DONE','FAILED','CANNOT_ASSESS')"
+            )
+        for item in pending:
+            await self.fail_run(item["run_id"], "PROCESS_INTERRUPTED")
+
     async def set_phase(self, run_id: str, phase: Phase, status: RunStatus) -> None:
         if phase not in STATUS or STATUS[phase] != status:
             raise LedgerStateError("Phase and user-facing status do not match.")
@@ -312,6 +342,14 @@ class LedgerRepository:
             (after, limit),
         )
         return tuple(Event.model_validate(dict(r)) for r in result)
+
+    async def latest_event(self, run_id: str, kind: str) -> Event | None:
+        result = await self._read(
+            run_id,
+            "SELECT * FROM events WHERE run_id=? AND kind=? ORDER BY event_id DESC LIMIT 1",
+            (kind,),
+        )
+        return Event.model_validate(dict(result[0])) if result else None
 
     async def add_claims(self, run_id: str, claims: ClaimSet) -> None:
         async with self._write(run_id) as db:

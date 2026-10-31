@@ -73,10 +73,18 @@ def test_invalid_dossier_is_rejected(bad):
         build_context_packets(ClaimSet(), dossier(data_json=bad), Policy(max_check_usd=0))
 
 
-@pytest.mark.parametrize("slices", [{"other": "{}"}, {"identity": '{"funding":{}}'}])
-def test_supplied_slices_cannot_bypass_group_scope(slices):
+def test_unknown_slice_agents_are_rejected():
     with pytest.raises(ValueError):
-        build_context_packets(ClaimSet(), slices, Policy(max_check_usd=0))
+        build_context_packets(ClaimSet(), {"other": "{}"}, Policy(max_check_usd=0))
+
+
+def test_legacy_full_dossier_slices_are_filtered_without_leaking_groups():
+    packets = build_context_packets(
+        ClaimSet(),
+        {"identity": '{"funding":{},"basic_info":{"name":"Synthetic"}}'},
+        Policy(max_check_usd=0),
+    )
+    assert json.loads(packets[0].dossier_json) == {"basic_info": {"name": "Synthetic"}}
 
 
 def test_claim_order_preserved_and_duplicate_ids_rejected():
