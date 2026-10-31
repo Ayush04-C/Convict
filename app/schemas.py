@@ -1,19 +1,52 @@
 """Shared contracts. Ayush maintains; coordinate changes after handoff."""
+
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, SecretStr
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, model_validator
 
 AgentName = Literal["identity", "scale_team", "funding", "traction"]
 Topic = Literal[
-    "identity_founding", "identity_hq", "identity_founder", "team_size", "team_growth",
-    "funding_raised", "funding_round", "investors", "revenue_arr", "revenue_growth",
-    "valuation_ask", "traction_users", "traction_customers", "hiring", "product_other",
+    "identity_founding",
+    "identity_hq",
+    "identity_founder",
+    "team_size",
+    "team_growth",
+    "funding_raised",
+    "funding_round",
+    "investors",
+    "revenue_arr",
+    "revenue_growth",
+    "valuation_ask",
+    "traction_users",
+    "traction_customers",
+    "hiring",
+    "product_other",
 ]
 FindingStatus = Literal["VERIFIED", "PARTIAL", "CONTRADICTED", "UNVERIFIABLE"]
-Phase = Literal["QUEUED", "INGEST", "RESOLVE", "ROUND1", "CHALLENGE", "REPLY",
-                "ADJUDICATE", "SCORING", "DONE", "FAILED", "CANNOT_ASSESS"]
-RunStatus = Literal["queued", "parsing", "resolving", "round1", "round2", "scoring",
-                    "done", "cannot_assess", "failed"]
+Phase = Literal[
+    "QUEUED",
+    "INGEST",
+    "RESOLVE",
+    "ROUND1",
+    "CHALLENGE",
+    "REPLY",
+    "ADJUDICATE",
+    "SCORING",
+    "DONE",
+    "FAILED",
+    "CANNOT_ASSESS",
+]
+RunStatus = Literal[
+    "queued",
+    "parsing",
+    "resolving",
+    "round1",
+    "round2",
+    "scoring",
+    "done",
+    "cannot_assess",
+    "failed",
+]
 DecisionTier = Literal["INVEST", "INVEST_WITH_CONDITIONS", "DIG_DEEPER", "PASS"]
 
 
@@ -165,6 +198,15 @@ class Resolution(FrozenModel):
     company_id: int | None = None
     reason: str
     candidates_json: str = "[]"
+
+    @model_validator(mode="after")
+    def consistent_identity(self):
+        if self.status == "resolved":
+            if self.company_id is None or self.company_id <= 0:
+                raise ValueError("Resolved identity requires a positive company ID.")
+        elif self.company_id is not None:
+            raise ValueError("Unresolved identity cannot select a company ID.")
+        return self
 
 
 class Event(FrozenModel):
