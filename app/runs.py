@@ -8,8 +8,9 @@ import os
 import tempfile
 
 import anyio
-from fastapi import APIRouter, Depends, File, Form, Header, Request, UploadFile
+from fastapi import APIRouter, Depends, File, Form, Header, Request, UploadFile, Response
 from sse_starlette.sse import EventSourceResponse
+from starlette.responses import JSONResponse
 
 from app.auth import get_current_user
 from app.errors import ApiError
@@ -19,6 +20,8 @@ from app.uploads import MAX_UPLOAD_BYTES
 from crustdata.client import normalize_domain
 from ledger.errors import LedgerNotFound
 from ledger.repo import TERMINAL
+from report.builder import build_report
+from report.markdown import render_markdown
 
 router = APIRouter(prefix="/runs", tags=["Runs"])
 
@@ -175,13 +178,22 @@ async def events(
 
 
 @router.get("/{run_id}/report")
-async def report(run_id: str, request: Request, user: str = Depends(get_current_user)):
+async def report(
+    run_id: str, request: Request, format: str = "json", user: str = Depends(get_current_user)
+):
     run = await owned(request, run_id, user)
     if run["phase"] not in TERMINAL:
         raise ApiError(409, "REPORT_NOT_READY", "The run is still processing.")
-    raise ApiError(
-        501, "REPORT_NOT_IMPLEMENTED", "Report generation is the next implementation stage."
-    )
+    if format not in ("json", "markdown"):
+        raise ApiError(422, "INVALID_FORMAT", "Report format must be json or markdown.")
+    result = await build_report(run_id, request.app.state.ledger)
+    if format == "markdown":
+        return Response(
+            render_markdown(result),
+            media_type="text/markdown",
+            headers={"Cache-Control": "no-store"},
+        )
+    return JSONResponse(result, headers={"Cache-Control": "no-store"})
 
 
 @router.post("/{run_id}/chat")

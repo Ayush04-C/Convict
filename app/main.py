@@ -80,8 +80,8 @@ def create_app(
 
     app = FastAPI(
         title="Leo API",
-        version="0.4.0",
-        description="Authenticated upload, persistent pipeline, status and SSE. Reports and chat are deferred.",
+        version="0.5.0",
+        description="Authenticated upload, pipeline, status, SSE and saved reports. Chat is deferred.",
         lifespan=lifespan,
     )
     app.state.settings = settings
@@ -107,8 +107,10 @@ def create_app(
             "live_analysis": settings.mode == "live",
             "assessment_complete": False,
             "pipeline": True,
-            "report": False,
-            "limitations": ["Real adjudicator and final report integration remain unfinished."],
+            "report": True,
+            "limitations": [
+                "Real lead adjudication remains unfinished; reports preserve saved outcomes and stub provenance."
+            ],
         }
 
     app.add_middleware(UploadGuard)

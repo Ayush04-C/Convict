@@ -210,7 +210,7 @@ async def test_sse_invalid_cursor_is_safe(auth_settings, tmp_path, cursor):
         assert response.status_code == 422
 
 
-async def test_reports_and_chat_are_owned_and_explicitly_deferred(auth_settings, tmp_path):
+async def test_report_waits_for_terminal_state_and_chat_remains_deferred(auth_settings, tmp_path):
     async with api(auth_settings, tmp_path) as (app, client):
         run = await app.state.ledger.create_run(
             auth_settings.demo_user, "Synthetic", None, Policy(max_check_usd=0), "not-used"
@@ -218,7 +218,8 @@ async def test_reports_and_chat_are_owned_and_explicitly_deferred(auth_settings,
         assert (await client.get(f"/runs/{run}/report")).status_code == 409
         assert (await client.post(f"/runs/{run}/chat")).status_code == 501
         await app.state.ledger.fail_run(run, "TEST")
-        assert (await client.get(f"/runs/{run}/report")).status_code == 501
+        report = await client.get(f"/runs/{run}/report")
+        assert report.status_code == 200 and report.json()["decision"] is None
 
 
 async def test_disconnecting_event_consumer_does_not_cancel_job(auth_settings, tmp_path):
