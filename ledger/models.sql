@@ -86,3 +86,93 @@ SELECT f.*, COALESCE((
   ORDER BY r.revision_seq DESC LIMIT 1
 ), f.severity) AS severity_final
 FROM findings f;
+
+-- Preserve history; only coordinator state and cache are mutable.
+CREATE TRIGGER IF NOT EXISTS claims_no_update
+BEFORE UPDATE ON claims BEGIN
+  SELECT RAISE(ABORT, 'append-only record');
+END;
+CREATE TRIGGER IF NOT EXISTS claims_no_delete
+BEFORE DELETE ON claims BEGIN
+  SELECT RAISE(ABORT, 'append-only record');
+END;
+CREATE TRIGGER IF NOT EXISTS evidence_no_update
+BEFORE UPDATE ON evidence BEGIN
+  SELECT RAISE(ABORT, 'append-only record');
+END;
+CREATE TRIGGER IF NOT EXISTS evidence_no_delete
+BEFORE DELETE ON evidence BEGIN
+  SELECT RAISE(ABORT, 'append-only record');
+END;
+CREATE TRIGGER IF NOT EXISTS metrics_no_update
+BEFORE UPDATE ON metrics BEGIN
+  SELECT RAISE(ABORT, 'append-only record');
+END;
+CREATE TRIGGER IF NOT EXISTS metrics_no_delete
+BEFORE DELETE ON metrics BEGIN
+  SELECT RAISE(ABORT, 'append-only record');
+END;
+CREATE TRIGGER IF NOT EXISTS findings_no_update
+BEFORE UPDATE ON findings BEGIN
+  SELECT RAISE(ABORT, 'append-only record');
+END;
+CREATE TRIGGER IF NOT EXISTS findings_no_delete
+BEFORE DELETE ON findings BEGIN
+  SELECT RAISE(ABORT, 'append-only record');
+END;
+CREATE TRIGGER IF NOT EXISTS challenges_no_update
+BEFORE UPDATE ON challenges BEGIN
+  SELECT RAISE(ABORT, 'append-only record');
+END;
+CREATE TRIGGER IF NOT EXISTS challenges_no_delete
+BEFORE DELETE ON challenges BEGIN
+  SELECT RAISE(ABORT, 'append-only record');
+END;
+CREATE TRIGGER IF NOT EXISTS replies_no_update
+BEFORE UPDATE ON replies BEGIN
+  SELECT RAISE(ABORT, 'append-only record');
+END;
+CREATE TRIGGER IF NOT EXISTS replies_no_delete
+BEFORE DELETE ON replies BEGIN
+  SELECT RAISE(ABORT, 'append-only record');
+END;
+CREATE TRIGGER IF NOT EXISTS finding_revisions_no_update
+BEFORE UPDATE ON finding_revisions BEGIN
+  SELECT RAISE(ABORT, 'append-only record');
+END;
+CREATE TRIGGER IF NOT EXISTS finding_revisions_no_delete
+BEFORE DELETE ON finding_revisions BEGIN
+  SELECT RAISE(ABORT, 'append-only record');
+END;
+CREATE TRIGGER IF NOT EXISTS verdicts_no_update
+BEFORE UPDATE ON verdicts BEGIN
+  SELECT RAISE(ABORT, 'append-only record');
+END;
+CREATE TRIGGER IF NOT EXISTS verdicts_no_delete
+BEFORE DELETE ON verdicts BEGIN
+  SELECT RAISE(ABORT, 'append-only record');
+END;
+CREATE TRIGGER IF NOT EXISTS decisions_no_update
+BEFORE UPDATE ON decisions BEGIN
+  SELECT RAISE(ABORT, 'append-only record');
+END;
+CREATE TRIGGER IF NOT EXISTS decisions_no_delete
+BEFORE DELETE ON decisions BEGIN
+  SELECT RAISE(ABORT, 'append-only record');
+END;
+CREATE TRIGGER IF NOT EXISTS context_packets_no_update
+BEFORE UPDATE ON context_packets BEGIN
+  SELECT RAISE(ABORT, 'append-only record');
+END;
+CREATE TRIGGER IF NOT EXISTS context_packets_no_delete
+BEFORE DELETE ON context_packets BEGIN
+  SELECT RAISE(ABORT, 'append-only record');
+END;
+CREATE TRIGGER IF NOT EXISTS events_no_update
+BEFORE UPDATE ON events BEGIN
+  SELECT RAISE(ABORT, 'append-only record');
+END;
+CREATE TRIGGER IF NOT EXISTS events_no_delete
+BEFORE DELETE ON events BEGIN
+  SELECT RAISE(ABORT, 'append-only record');
+END;
