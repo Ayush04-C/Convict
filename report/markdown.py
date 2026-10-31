@@ -59,6 +59,44 @@ def render_markdown(report: dict) -> str:
         lines += ["", "## Decision reasons", ""] + [
             "- " + text(reason) for reason in decision["reasons"]
         ]
+    breakdown = report.get("scoring_breakdown")
+    if breakdown:
+        lines += [
+            "",
+            "## Saved scoring calculation",
+            "",
+            "| Component | Weight | Score | Contribution |",
+            "|---|---|---|---|",
+            f"| Credibility | {text(breakdown['credibility_weight'])} | {text(decision['credibility'])} | {text(breakdown['credibility_contribution'])} |",
+        ]
+        for dimension in breakdown["dimensions"]:
+            lines.append(
+                "| "
+                + " | ".join(
+                    text(v)
+                    for v in [
+                        dimension["agent"],
+                        dimension["weight"],
+                        dimension["score"],
+                        dimension["contribution"],
+                    ]
+                )
+                + " |"
+            )
+        lines += [
+            "",
+            "Weighted total before overrides: " + text(breakdown["weighted_total"]),
+            "Confidence components: "
+            + text(json.dumps(breakdown["confidence_components"], sort_keys=True)),
+            "Applied caps/overrides: " + text(", ".join(breakdown["applied_caps"]) or "None"),
+            "Sizing: policy limit × final tier percentage × stored confidence.",
+            "Analyst severity penalties are already included in dimension scores; no second penalty is applied.",
+        ]
+    elif decision:
+        lines += [
+            "",
+            "Scoring calculation breakdown was not saved for this older decision; its score has not been recomputed.",
+        ]
     lines += [
         "",
         "## Claim findings",

@@ -55,6 +55,7 @@ error behavior and the single-process execution limit.
 
 Use `python -m scripts.leo_cli --help` for authenticated CLI analysis/report export.
 The CLI uses the same API and saved decision; it never recalculates a score.
+See [scoring](docs/scoring.md) for the fixed policy and saved calculation breakdown.
 
 See [contracts](docs/contracts.md), [ownership](docs/ownership.md),
 [implementation stages](docs/ayush-stages.md), and [handoff](docs/handoff.md).

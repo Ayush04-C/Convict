@@ -14,7 +14,7 @@ from leo.context import AGENTS, build_context_packets
 from leo.entity_resolution import resolve_company
 from leo.gates import confirm_gates
 from leo.runtime import PipelineDependencies
-from leo.scoring import compute
+from leo.scoring import compute_with_breakdown
 from sandbox.ledger_writer import LedgerWriter
 from sandbox.runner import SandboxRunner
 from sandbox.scoped_tools import ScopedCrustdata
@@ -126,5 +126,7 @@ async def _execute(run_id, repo, settings, deps):
         return
     gates = await confirm_gates(repo, run_id, claims, dossier, proposal_agents)
     await repo.add_event(run_id, "gates_confirmed", {"gates": gates})
-    decision = compute(claims, findings, verdicts, run["policy"], confirmed_gates=gates)
-    await repo.save_decision(run_id, decision, adjudication)
+    decision, breakdown = compute_with_breakdown(
+        claims, findings, verdicts, run["policy"], confirmed_gates=gates
+    )
+    await repo.save_decision(run_id, decision, adjudication, scoring_breakdown=breakdown)
