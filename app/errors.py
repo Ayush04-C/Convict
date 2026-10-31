@@ -1,8 +1,12 @@
 """Ayush: safe shared error format; never echo raw request data."""
+import logging
+
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException
+
+logger = logging.getLogger("leo.api")
 
 
 def install_handlers(app: FastAPI) -> None:
@@ -14,7 +18,8 @@ def install_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(HTTPException)
     async def http_error(request: Request, exc: HTTPException):
-        return response(request, exc.status_code, f"HTTP_{exc.status_code}", str(exc.detail), exc.headers)
+        code = "UNAUTHORIZED" if exc.status_code == 401 else f"HTTP_{exc.status_code}"
+        return response(request, exc.status_code, code, str(exc.detail), exc.headers)
 
     @app.exception_handler(RequestValidationError)
     async def invalid_request(request: Request, exc: RequestValidationError):
@@ -22,4 +27,7 @@ def install_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(Exception)
     async def internal_error(request: Request, exc: Exception):
+        # Exception text/tracebacks can contain provider secrets or user input.
+        logger.error("Unhandled %s request_id=%s", type(exc).__name__,
+                     getattr(request.state, "request_id", "unknown"))
         return response(request, 500, "INTERNAL_ERROR", "An unexpected error occurred.")

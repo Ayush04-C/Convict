@@ -13,7 +13,7 @@ def main():
     except FileExistsError:
         print("Existing .env retained.")
     else:
-        print("Created .env for stub mode. Configure secrets before the authentication stage.")
+        print("Created .env. Next run: python -m scripts.configure_auth")
 
 
 if __name__ == "__main__":

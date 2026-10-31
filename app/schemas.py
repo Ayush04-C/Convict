@@ -1,7 +1,7 @@
 """Shared contracts. Ayush maintains; coordinate changes after handoff."""
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, SecretStr
 
 AgentName = Literal["identity", "scale_team", "funding", "traction"]
 Topic = Literal[
@@ -19,6 +19,21 @@ DecisionTier = Literal["INVEST", "INVEST_WITH_CONDITIONS", "DIG_DEEPER", "PASS"]
 
 class FrozenModel(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid", allow_inf_nan=False)
+
+
+class LoginRequest(FrozenModel):
+    username: str = Field(strict=True, min_length=1, max_length=100)
+    password: SecretStr = Field(min_length=1, max_length=1024)
+
+
+class TokenResponse(FrozenModel):
+    access_token: str
+    token_type: Literal["bearer"] = "bearer"
+    expires_in: int = 3600
+
+
+class UserResponse(FrozenModel):
+    username: str
 
 
 class Claim(FrozenModel):
