@@ -61,9 +61,18 @@ async def test_non_numeric_value_stays_text_for_normalization(pdf):
     assert result.claims[0].value == "Series A"
 
 
-async def test_empty_claim_list_is_valid(pdf):
-    result = await extract_claims(pdf, extractor=FakeExtractor(reply()), model="m")
-    assert result.claims == ()
+async def test_an_empty_claim_list_is_retried_not_accepted(pdf):
+    fake = FakeExtractor(reply(), reply(raw()))
+    result = await extract_claims(pdf, extractor=fake, model="m")
+    assert len(result.claims) == 1 and len(fake.calls) == 2
+    assert "contained no claims" in fake.calls[1]["prompt"]
+
+
+async def test_a_deck_with_no_extracted_claims_fails_loudly_instead_of_getting_a_verdict(pdf):
+    fake = FakeExtractor(reply(), reply())
+    with pytest.raises(ExtractionError, match="invalid claims twice.*no claims"):
+        await extract_claims(pdf, extractor=fake, model="m")
+    assert len(fake.calls) == 2
 
 
 async def test_invalid_json_is_retried_once_with_the_error_in_the_prompt(pdf):
