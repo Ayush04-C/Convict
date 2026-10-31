@@ -1,6 +1,6 @@
 PYTHON ?= python
 
-.PHONY: run test lint demo auth-setup ledger-init ledger-demo provider-demo context-demo api-demo
+.PHONY: run test lint demo setup auth-setup ledger-init ledger-demo provider-demo context-demo api-demo
 api-demo:
 	$(PYTHON) -m scripts.api_demo
 context-demo:
@@ -11,6 +11,9 @@ ledger-init:
 	$(PYTHON) -m scripts.init_ledger
 ledger-demo:
 	$(PYTHON) -m scripts.ledger_demo
+setup:
+	@test -f .env || (cp .env.example .env && chmod 600 .env)
+	$(PYTHON) -m scripts.configure_auth --demo
 auth-setup:
 	$(PYTHON) -m scripts.configure_auth
 run:
