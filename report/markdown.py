@@ -142,7 +142,7 @@ def render_markdown(report: dict) -> str:
     lines += [
         "## Evidence and source dates",
         "",
-        "Sources below are saved evidence records, not necessarily independent sources. Crustdata is the company-data provider. “Retrieved” is when this run fetched the data. “Source updated” is when the provider says its underlying record changed. An unavailable update date does not establish freshness.",
+        "Sources below are saved evidence records, not necessarily independent sources. Crustdata is the company-data provider. “Retrieved” is when the saved provider response was fetched; that response may have been reused from cache. “Source updated” is when the provider says its underlying record changed. An unavailable update date does not establish freshness.",
         "",
     ]
     for i, item in enumerate(evidence, 1):

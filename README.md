@@ -38,7 +38,8 @@ reopening does not start another analysis. Keep the server running while it work
 Provider API keys stay on the server. The browser holds its access token only in memory
 and clears the report on sign-out. Closing the page does not cancel a running review.
 Missing provider update dates mean the source supplied no update timestamp; retrieval
-time is a separate field and does not establish when the source record last changed.
+time refers to the saved provider response (which may be cached) and does not establish
+when the source record last changed.
 Configure your demo password once through the hidden prompt; repeat setup preserves
 existing credentials and provider keys. API startup requires valid auth settings.
 See [authentication](docs/authentication.md) for manual testing and expected responses.

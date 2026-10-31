@@ -72,7 +72,7 @@ function reportView(report){
     root.append(card);
   }
   const sources=node('details');sources.append(node('summary','Evidence and source dates ('+report.evidence.length+' records)'));
-  sources.append(node('p','These are saved evidence records, not necessarily independent sources. Retrieval time is separate from the date the provider last updated its records.'));
+  sources.append(node('p','These are saved evidence records, not necessarily independent sources. Retrieval time is when the saved provider response was fetched; it may have been reused from cache. This is separate from the date the provider last updated its records.'));
   report.evidence.forEach((e,i)=>{const card=node('div',null,'source');card.id='source-'+(i+1);card.append(node('strong','Source '+(i+1)+' — '+(e.display_label||pretty(e.field_path))),node('p',e.display_summary||'Details retained in the saved report.'),node('p','Provider: '+(e.source==='crustdata.company.enrich'?'Crustdata':e.source)),node('p','Retrieved: '+(e.provider_fetched_at?date(e.provider_fetched_at):'Not established from saved evidence')),node('p','Source updated: '+date(e.source_updated_at)));sources.append(card);});
   // Open the evidence section when following a source link.
   root.addEventListener('click',event=>{if(event.target.closest('a[href^="#source-"]'))sources.open=true;},{signal:session.signal});
