@@ -7,9 +7,9 @@ restricted agent ledger access, the health endpoint, schemas, fixture-backed
 specialists, offline demos, and deterministic scoring.
 Provider clients, response caching and structured Gemini output are implemented.
 Company resolution, isolated context packets and sandbox phase execution are implemented.
-Live extraction, persistent orchestration, upload, SSE, report API
-and chat still require implementation. Run endpoints reject unauthenticated calls
-with 401 and return 501 after valid authentication until their implementation stage.
+PDF extraction, persistent orchestration, authenticated upload, status and SSE are
+implemented. The real lead adjudicator and final scoring/report integration remain
+unfinished; chat is deferred. Stub components stay explicitly labelled.
 
 ## Quick start
 
@@ -48,7 +48,9 @@ Run `make context-demo` for the offline resolution/context/sandbox handoff, or
 `python -m scripts.context_demo --timeout-agent` to verify one failed agent and
 three surviving workers. See [resolution/context](docs/resolution-context.md) and
 [sandbox](docs/sandbox.md) for contracts, limits and tests. These demos use stub
-specialists; the production pipeline and run APIs are still unfinished.
+specialists. Run `make api-demo` for the complete offline login/upload/pipeline/SSE
+flow. See [pipeline/API](docs/pipeline-api.md) for Postman fields, live-mode setup,
+error behavior and the single-process execution limit.
 
 See [contracts](docs/contracts.md), [ownership](docs/ownership.md),
 [implementation stages](docs/ayush-stages.md), and [handoff](docs/handoff.md).

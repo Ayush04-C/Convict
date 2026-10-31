@@ -1,8 +1,8 @@
 # Ayush implementation stages
 
 Foundation, authentication, ledger, providers, resolution/context and sandbox
-execution are implemented. Persistent pipeline coordination and live analysis
-remains unfinished. Existing checks are real; test starter docstrings do not count
+execution, pipeline coordination and run APIs are implemented. Real lead
+adjudication and final scoring/report integration remain unfinished. Test starter docstrings do not count
 as implemented tests. See `authentication.md` for setup and manual verification.
 
 | Stage | Scope | Gate |
@@ -13,8 +13,8 @@ as implemented tests. See `authentication.md` for setup and manual verification.
 | Providers (implemented) | Crustdata client/cache/dossier, Gemini adapter and typed errors | Mocked failures, cached repeat call, live smoke checks; no live CI |
 | Resolution/context (implemented) | Identity gate, lookalikes, bounded web fallback and dossier slices | Clear/tied/empty candidates, frozen packets and ledger persistence |
 | Sandbox (implemented) | Scoped writers/tools, call limits and phase execution | Timeout/cancellation, duplicate execution and capability revocation tests |
-| Pipeline (next) | Phase controller, barriers, live agent wiring and persistent run | Run saves a decision; failures are reflected honestly |
-| API | Upload, status, event stream/replay, report, owner checks | Authenticated client completes a run; other owners cannot access it |
+| Pipeline (implemented) | Phase controller, barriers, live agent wiring, confirmed gates and persistent run | Run saves a decision; failures are reflected honestly |
+| API (implemented; report deferred) | Upload, status, event stream/replay and owner checks | Authenticated client completes a run; other owners cannot access it |
 | Scoring/report | Integrate confirmed gates and effective findings; report evidence dates | All policy boundaries and evidence references; no unverifiable data presented as fact |
 | Chat/demo (deferred) | Grounded chat; minimal UI only if time permits | Evidence-only answers, repeatable honest/inflated/fake-company demo |
 | Submission (later) | Record, document, submit after integration | Green checks, clear limits, under-two-minute recording |
