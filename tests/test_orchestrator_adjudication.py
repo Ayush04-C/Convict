@@ -101,3 +101,23 @@ async def test_a_failing_model_does_not_fail_the_run_at_adjudication(ledger, tmp
     run, _ = await launch(ledger, tmp_path, deps)
     assert (await ledger.get_run(run))["status"] == "done"
     assert (await ledger.get_adjudication(run)).is_stub is False
+
+
+async def test_a_gate_whose_evidence_is_a_large_value_is_still_confirmed(ledger, tmp_path):
+    """funding_round_absent cites the funding history, which is large for a real company. A copy
+    truncated for storage can never equal the trusted dossier's value, so the gate used to be lost."""
+    from copy import deepcopy
+
+    from app.schemas import Claim, ClaimSet
+    from tests.pipeline_support import COMPANY
+
+    data = deepcopy(COMPANY)
+    data["funding"]["milestones"] = [{"round_type": "series_c", "investors_detailed": [
+        {"name": f"Investor {i}", "note": "x" * 80} for i in range(300)]}]
+    claims = ClaimSet(company_name="Synthetic", claims=(
+        Claim(id="C1", topic="funding_round", text="Latest round: Series D", value="Series D", slide=1),))
+    deps = dependencies(data=data, claims=claims)
+    deps.adjudicate = adjudicate
+    run, _ = await launch(ledger, tmp_path, deps)
+    decision = await ledger.get_decision(run)
+    assert decision.gates == ("funding_round_absent",) and decision.verdict == "PASS"

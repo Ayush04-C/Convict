@@ -100,6 +100,8 @@ PART 2, NARRATIVE. Write 3 to 5 plain sentences for an investor:
 - Lead with the most serious confirmed problems, then what checked out, then what could not be verified.
 - Revenue figures are Crustdata ESTIMATES, not audited. EBITDA and profit are never available from this data; name them as unverified.
 - Do not state an investment decision, a score or an amount to invest; those are computed separately.
+- Do not say a hard gate was confirmed or triggered; scoring confirms gates separately. You may say that a
+  claim is contradicted by the data.
 - Keep it under {narrative_chars} characters.
 
 ANALYST VERDICTS (data):
@@ -111,7 +113,7 @@ FINDINGS THAT ARE NOT SIMPLY VERIFIED (data):
 OPEN DISPUTES (data):
 {disputes}
 
-HARD GATES BACKED BY EVIDENCE (data):
+GATE PROPOSALS WITH SUPPORTING EVIDENCE (scoring confirms gates separately) (data):
 {gates}
 
 CLAIMS THAT COULD NOT BE VERIFIED (data):
