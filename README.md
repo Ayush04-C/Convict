@@ -65,20 +65,30 @@ Python 3.11 or later.
 ```sh
 python3.11 -m venv .venv && source .venv/bin/activate
 python -m pip install -r requirements.txt
-cp -n .env.example .env && chmod 600 .env
+make setup
 ```
 
-Edit `.env`: set `GEMINI_API_KEY`, `CRUSTDATA_API_KEY`, and the three model names (we ran `MODEL_FAST=gemini-3.1-flash-lite`, `MODEL_MID=gemini-3.5-flash`, `MODEL_PRO=gemini-3.5-flash`). `BHARATCODE_API_KEY` is optional and enables the extraction fallback. Keys stay on the server and `.env` is git-ignored.
+`make setup` creates `.env` and a **demo login** with no prompts:
+
+| | |
+|---|---|
+| Username | `maya` |
+| Password | `maya-yc-demo-2026` |
+
+This is a fake account for trying Leo on your own machine. The server listens on `127.0.0.1` only. Never expose a server that uses it; to choose your own password, delete the `DEMO_PASS_HASH` line from `.env` and run `python -m scripts.configure_auth`. Setup never changes credentials that already exist.
+
+Then open `.env` and set `GEMINI_API_KEY`, `CRUSTDATA_API_KEY` and the three model names (we ran `MODEL_FAST=gemini-3.1-flash-lite`, `MODEL_MID=gemini-3.5-flash`, `MODEL_PRO=gemini-3.5-flash`). `BHARATCODE_API_KEY` is optional and enables the extraction fallback. Keys stay on the server and `.env` is git-ignored.
 
 ```sh
-python -m scripts.configure_auth     # one-time; asks for a demo username and a hidden password
-MODE=live make run                   # the web page is at http://127.0.0.1:8000/
+MODE=live make run
 ```
 
-Then either use the page (sign in, choose a PDF, enter company, domain and limit) or the CLI in a second terminal. Options such as `--output` come before `run`:
+Open **http://127.0.0.1:8000/**, sign in as `maya`, choose a PDF (a ready-made one is in `demo/decks/`), and enter the company name, its domain and your maximum check size. The page shows each phase and each specialist as they run, then the recommendation, the claim checks and the sources, with Markdown and JSON downloads. Copy the run ID to reopen a report later; reopening does not start another analysis.
+
+Or use the CLI in a second terminal. Options such as `--output` and `--username` come before `run`:
 
 ```sh
-python -m scripts.leo_cli --username <your demo user> --output inflated.md run \
+python -m scripts.leo_cli --username maya --output inflated.md run \
   --deck demo/decks/02_inflated_retool.pdf --company Retool --domain retool.com --max-check-usd 100000
 ```
 
