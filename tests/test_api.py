@@ -1,15 +1,13 @@
-import httpx
-
-from app.main import create_app
+from app.auth import create_access_token
 
 
-async def test_health_and_explicit_unimplemented_api():
-    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=create_app()),
-                                 base_url="http://test") as client:
-        assert (await client.get("/health")).json()["live_analysis"] is False
-        for path, method in [("/auth/login","post"), ("/runs","post"), ("/runs/test","get")]:
-            response = await getattr(client, method)(path)
-            assert response.status_code == 501
-            assert response.json()["error"]["request_id"] == response.headers["X-Request-ID"]
-        assert (await client.get("/docs")).status_code == 200
-        assert (await client.get("/missing")).status_code == 404
+async def test_health_docs_and_explicit_unimplemented_api(client, auth_settings):
+    assert (await client.get("/health")).json()["live_analysis"] is False
+    headers = {"Authorization": "Bearer " + create_access_token("test-user", auth_settings)}
+    for path, method in [("/runs", "post"), ("/runs/test", "get")]:
+        assert (await getattr(client, method)(path)).status_code == 401
+        response = await getattr(client, method)(path, headers=headers)
+        assert response.status_code == 501
+        assert response.json()["error"]["request_id"] == response.headers["X-Request-ID"]
+    assert (await client.get("/docs")).status_code == 200
+    assert (await client.get("/missing")).status_code == 404
