@@ -70,6 +70,10 @@ are UNVERIFIABLE. Revenue estimates are estimates, not audited ARR confirmation.
   primary supplied none. Unverifiable findings contribute no credit or denominator.
 - No verifiable claims: credibility is null, effective score is zero, outcome is
   DIG_DEEPER with zero sizing unless a confirmed gate requires PASS.
+- The confidence claim-share denominator includes testable policy-backed topics
+  with an assigned primary specialist. Background-only/non-testable claims are
+  not assessment claims. Uncited findings cannot earn credibility credit, and
+  secondary fallback is limited to the topic's configured secondary specialists.
 - Failed/missing agent verdicts contribute zero to their fixed score weights and
   zero to the four-agent confidence average; do not redistribute their weights.
 - Reject nonfinite or out-of-range score inputs through schema validation. Reject
