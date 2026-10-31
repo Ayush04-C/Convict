@@ -1,0 +1,5 @@
+-r requirements.txt
+# Verify the live SDK/model combination before enabling providers.
+google-adk
+google-genai
+pymupdf
