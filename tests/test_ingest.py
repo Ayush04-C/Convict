@@ -369,7 +369,9 @@ async def test_a_hung_gemini_call_is_cut_off_by_the_hard_cap():
     ("RemoteProtocolError", "network"),
 ])
 async def test_http_transport_errors_are_classified_as_provider_unavailable(error, message):
-    httpx = pytest.importorskip("httpx")
+    pytest.importorskip("google.genai")  # the adapter imports the SDK before it calls anything
+    import httpx
+
     from ingest.claim_extractor import ProviderUnavailableError, RawClaimSet
     adapter = adapter_failing_with(getattr(httpx, error)("boom"))
     with pytest.raises(ProviderUnavailableError, match=message):
